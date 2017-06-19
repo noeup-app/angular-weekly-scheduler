@@ -4,6 +4,7 @@ angular.module('weeklyScheduler')
     var MONTH = 'month';
     var WEEK = 'week';
     var DAY = 'day';
+    var HOUR = 'hour';
 
     return {
       const: {
@@ -28,8 +29,21 @@ angular.module('weeklyScheduler')
       addWeek: function (moment, nbWeek) {
         return moment.clone().add(nbWeek, WEEK);
       },
+      addDay: function (moment, nbWeek) {
+        return moment.clone().add(nbWeek, DAY);
+      },
+      addHour: function (moment, nbWeek) {
+        return moment.clone().add(nbWeek, HOUR);
+      },
+
+      // addHour: function (moment, nbWeek) {
+      //   return moment.clone().add(nbWeek, HOUR);
+      // },
       weekPreciseDiff: function (start, end) {
         return end.clone().diff(start.clone(), WEEK, true);
+      },
+      dayDiff: function (start, end) {
+        return end.clone().endOf(DAY).diff(start.clone().startOf(DAY), DAY) + 1;
       },
       weekDiff: function (start, end) {
         return end.clone().endOf(WEEK).diff(start.clone().startOf(WEEK), WEEK) + 1;
@@ -56,6 +70,68 @@ angular.module('weeklyScheduler')
 
           // totalDays += dayInMonth; total += width;
           // console.log(startOfMonth, endOfMonth, dayInMonth, dayDiff, width, total, totalDays);
+        }
+        return result;
+      },
+      weekDistribution: function (minDate, maxDate) {
+        var i, result = [];
+        var startDate = minDate.clone();
+        var endDate = maxDate.clone();
+        var monthDiff = this.monthDiff(startDate, endDate);
+        var dayDiff = endDate.diff(startDate, DAY);
+
+        //var total = 0, totalDays = 0;
+        // console.log(startDate.toDate(), endDate.toDate(), monthDiff, dayDiff);
+        for (i = 0; i < dayDiff/7; i++) {
+          var startOfWeek = i === 0 ? startDate : startDate.add(1, WEEK).startOf(WEEK);
+          var endOfWeek = i === monthDiff - 1 ? endDate : startDate.clone().endOf(WEEK);
+          var width = Math.floor(7/ dayDiff * 1E8) / 1E6;
+
+          result.push({start: startOfWeek.clone(), end: endOfWeek.clone(), width: width});
+
+          // totalDays += dayInMonth; total += width;
+          // console.log(startOfMonth, endOfMonth, dayInMonth, dayDiff, width, total, totalDays);
+        }
+        return result;
+      },
+      /**
+       * Return a table of day with the associated witdh
+       * @param minDate
+       * @param maxDate
+       * @returns {Array}
+       */
+      dayDistribution: function (minDate, maxDate) {
+        var i, result = [];
+        var startDate = minDate.clone();
+        var endDate = maxDate.clone();
+        var dayDiff = endDate.diff(startDate, DAY);
+        var monthDiff = this.monthDiff(startDate, endDate);
+        // console.log('DAY DIFF', dayDiff);
+        // console.log('MONTH DIFF', monthDiff);
+
+        for (i = 0; i < dayDiff; i++) {
+          var startOfDay = i === 0 ? startDate : startDate.add(1, DAY).startOf(DAY);
+          var endOfDay = i === monthDiff - 1 ? endDate : startDate.clone().endOf(DAY);
+          var width = Math.floor(1 / dayDiff * 1E8) / 1E6;
+
+          result.push({start: startOfDay.clone(), end: endOfDay.clone(), width: width});
+        }
+        return result;
+      },
+      hourDistribution: function(minDate, maxDate) {
+        var i, result = [];
+        var startDate = minDate.clone();
+        var endDate = maxDate.clone();
+        var dayDiff = endDate.diff(startDate, DAY);
+        var monthDiff = this.monthDiff(startDate, endDate);
+
+        for (i = 0; i < (dayDiff*4); i++) {
+
+          var startOfHour = i === 0 ? startDate : startDate.add(1, MONTH).startOf(MONTH);
+          var endOfHour = i === monthDiff - 1 ? endDate : startDate.clone().endOf(MONTH);
+          var width = Math.floor(1 / dayDiff * 1E8) / 1E6 / 4;
+
+          result.push({start: startOfHour.clone(), end: endOfHour.clone(), width: width});
         }
         return result;
       }
