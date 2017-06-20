@@ -29,11 +29,11 @@ angular.module('weeklyScheduler')
       addWeek: function (moment, nbWeek) {
         return moment.clone().add(nbWeek, WEEK);
       },
-      addDay: function (moment, nbWeek) {
-        return moment.clone().add(nbWeek, DAY);
+      addDay: function (moment, nbDay) {
+        return moment.clone().add(nbDay, DAY);
       },
-      addHour: function (moment, nbWeek) {
-        return moment.clone().add(nbWeek, HOUR);
+      addHour: function (moment, nbHours) {
+        return moment.clone().add(nbHours, HOUR);
       },
 
       // addHour: function (moment, nbWeek) {
