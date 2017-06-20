@@ -24,21 +24,21 @@ angular.module('weeklyScheduler')
         var defaultNewScheduleSize = parseInt(attrs.size) || 8;
 
         var valToPixel = function (val) {
-          var percent = val / (conf.nbWeeks);
+          var percent = val / (conf.nbDays);
           return Math.floor(percent * element[0].clientWidth + 0.5);
         };
 
         var pixelToVal = function (pixel) {
           var percent = pixel / element[0].clientWidth;
-          return Math.floor(percent * (conf.nbWeeks) + 0.5);
+          return Math.floor(percent * (conf.nbDays) + 0.5);
         };
 
         var addSlot = function (start, end) {
           start = start >= 0 ? start : 0;
           end = end <= conf.nbWeeks ? end : conf.nbWeeks;
 
-          var startDate = timeService.addWeek(conf.minDate, start);
-          var endDate = timeService.addWeek(conf.minDate, end);
+          var startDate = timeService.addDay(conf.minDate, start);
+          var endDate = timeService.addDay(conf.minDate, end);
 
           scope.$apply(function () {
             var item = scope.item;
