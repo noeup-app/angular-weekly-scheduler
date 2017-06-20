@@ -91,13 +91,13 @@ angular.module('weeklyScheduler')
         var endDate = maxDate.clone();
         var monthDiff = this.monthDiff(startDate, endDate);
         var dayDiff = this.dayDiff(startDate, endDate);
-
+        var NB_DAY_IN_A_WEEK = 5
         //var total = 0, totalDays = 0;
         // console.log(startDate.toDate(), endDate.toDate(), monthDiff, dayDiff);
-        for (i = 0; i < dayDiff/7; i++) {
+        for (i = 0; i < dayDiff / NB_DAY_IN_A_WEEK; i++) {
           var startOfWeek = i === 0 ? startDate : startDate.add(1, WEEK).startOf(WEEK);
           var endOfWeek = i === monthDiff - 1 ? endDate : startDate.clone().endOf(WEEK);
-          var width = Math.floor(7/ dayDiff * 1E8) / 1E6;
+          var width = Math.floor(NB_DAY_IN_A_WEEK / dayDiff * 1E8) / 1E6;
 
           result.push({start: startOfWeek.clone(), end: endOfWeek.clone(), width: width});
 
@@ -123,6 +123,9 @@ angular.module('weeklyScheduler')
 
         for (i = 0; i < dayDiff; i++) {
           var startOfDay = i === 0 ? startDate : startDate.add(1, DAY).startOf(DAY);
+          while (this.isWeekEnd(startDate)) {
+            startDate = startDate.add(1, DAY).startOf(DAY)
+          }
           var endOfDay = i === monthDiff - 1 ? endDate : startDate.clone().endOf(DAY);
           var width = Math.floor(1 / dayDiff * 1E8) / 1E6;
 
