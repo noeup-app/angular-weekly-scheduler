@@ -25,8 +25,9 @@ angular.module('weeklyScheduler')
 
       // Calculate nb of weeks covered by minDate => maxDate
       var nbWeeks = timeService.weekDiff(minDate, maxDate);
+      var nbDays = timeService.dayDiff(minDate, maxDate);
 
-      var result = angular.extend(options, {minDate: minDate, maxDate: maxDate, nbWeeks: nbWeeks});
+      var result = angular.extend(options, { minDate: minDate, maxDate: maxDate, nbWeeks: nbWeeks, nbDays: nbDays });
       // Log configuration
       $log.debug('Weekly Scheduler configuration:', result);
 
