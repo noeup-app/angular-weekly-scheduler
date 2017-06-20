@@ -42,6 +42,9 @@ angular.module('weeklyScheduler')
       weekPreciseDiff: function (start, end) {
         return end.clone().diff(start.clone(), WEEK, true);
       },
+      isWeekEnd: function (date) {
+        return date.isoWeekday() === 6 || date.isoWeekday() === 7;
+      },
       dayDiff: function (start, end) {
         return end.clone().endOf(DAY).diff(start.clone().startOf(DAY), DAY) + 1;
       },
