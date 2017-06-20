@@ -18,14 +18,10 @@ angular.module('weeklyScheduler')
       var now = moment();
 
       // Calculate min date of all scheduled events
-      var minDate = (schedules ? schedules.reduce(function (minDate, slot) {
-        return timeService.compare(slot.start, 'isBefore', minDate);
-      }, now) : now).startOf('week');
+      var minDate = moment().add(- 1, 'month').startOf('week');
 
       // Calculate max date of all scheduled events
-      var maxDate = (schedules ? schedules.reduce(function (maxDate, slot) {
-        return timeService.compare(slot.end, 'isAfter', maxDate);
-      }, now) : now).clone().add(1, 'year').endOf('week');
+      var maxDate = moment().add(1, 'month').endOf('week');
 
       // Calculate nb of weeks covered by minDate => maxDate
       var nbWeeks = timeService.weekDiff(minDate, maxDate);
@@ -88,9 +84,6 @@ angular.module('weeklyScheduler')
               );
             }, []), options);
 
-            // Then resize schedule area knowing the number of weeks in scope
-            el.firstChild.style.width = schedulerCtrl.config.nbWeeks / 53 * 200 + '%';
-
             // Finally, run the sub directives listeners
             schedulerCtrl.$modelChangeListeners.forEach(function (listener) {
               listener(schedulerCtrl.config);
@@ -102,7 +95,10 @@ angular.module('weeklyScheduler')
           // Install mouse scrolling event listener for H scrolling
           mouseScroll(el, 20);
 
-          scope.$on(CLICK_ON_A_CELL, function(e, data) {
+          // Set the init width 
+          el.firstChild.style.width = '100%';
+
+          scope.$on(CLICK_ON_A_CELL, function (e, data) {
             zoomInACell(el, e, data);
           });
 
