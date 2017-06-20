@@ -22,13 +22,17 @@ angular.module('weeklyScheduler')
 
             // Deploy the grid system on element
             days.forEach(function (day, idx) {
+
+                if (timeService.isWeekEnd(day.start)) {
+                    return;
+                }
+
                 var child = GRID_TEMPLATE.clone().css({ width: day.width + '%' });
                 child.addClass('day');
                 if (angular.isUndefined(attrs.noText)) {
                     //console.log("timeService",timeService, day.start, day.start.toDate())
                     child.text(timeService.dF(day.start.toDate(), 'EEEE dd'));
                     handleClickEvent(child, days.length, idx, scope);
-                    console.log('child text', timeService.dF(day.start.toDate()));
                 }
                 element.append(child);
             });
