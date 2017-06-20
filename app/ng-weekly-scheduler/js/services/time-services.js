@@ -66,16 +66,16 @@ angular.module('weeklyScheduler')
       monthDistribution: function (minDate, maxDate) {
         var i, result = [];
         var startDate = minDate.clone();
-        var endDate = maxDate.clone();
+        var endDate = maxDate.clone().endOf(DAY);
         var monthDiff = this.monthDiff(startDate, endDate);
-        var dayDiff = endDate.diff(startDate, DAY);
+        var dayDiff = this.dayDiff(startDate, endDate);
 
         //var total = 0, totalDays = 0;
         // console.log(startDate.toDate(), endDate.toDate(), monthDiff, dayDiff);
         for (i = 0; i < monthDiff; i++) {
           var startOfMonth = i === 0 ? startDate : startDate.add(1, MONTH).startOf(MONTH);
           var endOfMonth = i === monthDiff - 1 ? endDate : startDate.clone().endOf(MONTH);
-          var dayInMonth = endOfMonth.diff(startOfMonth, DAY) + (i !== monthDiff - 1 && 1);
+          var dayInMonth = this.dayDiff(startOfMonth.startOf(DAY), endOfMonth);
           var width = Math.floor(dayInMonth / dayDiff * 1E8) / 1E6;
 
           result.push({start: startOfMonth.clone(), end: endOfMonth.clone(), width: width});
@@ -90,7 +90,7 @@ angular.module('weeklyScheduler')
         var startDate = minDate.clone();
         var endDate = maxDate.clone();
         var monthDiff = this.monthDiff(startDate, endDate);
-        var dayDiff = endDate.diff(startDate, DAY);
+        var dayDiff = this.dayDiff(startDate, endDate);
 
         //var total = 0, totalDays = 0;
         // console.log(startDate.toDate(), endDate.toDate(), monthDiff, dayDiff);
@@ -116,7 +116,7 @@ angular.module('weeklyScheduler')
         var i, result = [];
         var startDate = minDate.clone();
         var endDate = maxDate.clone();
-        var dayDiff = endDate.diff(startDate, DAY);
+        var dayDiff = this.dayDiff(startDate, endDate);
         var monthDiff = this.monthDiff(startDate, endDate);
         // console.log('DAY DIFF', dayDiff);
         // console.log('MONTH DIFF', monthDiff);
@@ -134,7 +134,7 @@ angular.module('weeklyScheduler')
         var i, result = [];
         var startDate = minDate.clone();
         var endDate = maxDate.clone();
-        var dayDiff = endDate.diff(startDate, DAY);
+        var dayDiff = this.dayDiff(startDate, endDate);
         var monthDiff = this.monthDiff(startDate, endDate);
 
         for (i = 0; i < (dayDiff*4); i++) {
