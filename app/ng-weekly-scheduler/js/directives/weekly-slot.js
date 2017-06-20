@@ -166,19 +166,50 @@ angular.module('weeklyScheduler')
 
         //// model -> UI ////////////////////////////////////
         ngModelCtrl.$formatters.push(function onModelChange(model) {
-          var ui = {
-            start: timeService.weekPreciseDiff(conf.minDate, moment(model.start), true),
-            end: timeService.weekPreciseDiff(conf.minDate, moment(model.end), true)
+
+          var translate = {
+            8: 0,
+            10: 6,
+            12: 12,
+            14: 12,
+            16: 18,
+            18: 24,
           };
-          //$log.debug('FORMATTER :', index, scope.$index, ui);
-          return ui;
+
+          console.log("")
+          console.log("model -> UI - RAW", moment(model.start).format("LLLL"), moment(model.end).format("LLLL"))
+
+          var startHour = moment(model.start).get('hour')
+          var endHour = moment(model.end).get('hour')
+
+          console.log(startHour, endHour)
+
+          var startHourTranslateTo = translate[startHour]
+          var endHourTranslateTo = translate[endHour]
+
+          console.log(startHourTranslateTo, endHourTranslateTo)
+
+          if (startHourTranslateTo !== undefined && endHourTranslateTo !== undefined) {
+            var start = moment(model.start).clone().set('hour', startHourTranslateTo)
+            var end = moment(model.end).clone().set('hour', endHourTranslateTo)
+            console.log("model -> UI", start.format("LLLL"), end.format("LLLL"))
+            var ui = {
+              start: timeService.dayPreciseDiff(conf.minDate, moment(start), true),
+              end: timeService.dayPreciseDiff(conf.minDate, moment(end), true)
+            };
+            console.log("ui model -> UI", ui)
+            //$log.debug('FORMATTER :', index, scope.$index, ui);
+            return ui;
+          }
+          console.log("ERROR while converting model to UI - startHour : " + startHour, "endHour : ", endHour)
+          return { start: -100, end: -100 }
         });
 
         ngModelCtrl.$render = function () {
           var ui = ngModelCtrl.$viewValue;
           var css = {
-            left: ui.start / conf.nbWeeks * 100 + '%',
-            width: (ui.end - ui.start) / conf.nbWeeks * 100 + '%'
+            left: ui.start / conf.nbDays * 100 + '%',
+            width: (ui.end - ui.start) / conf.nbDays * 100 + '%'
           };
 
           //$log.debug('RENDER :', index, scope.$index, css);
