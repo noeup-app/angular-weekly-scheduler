@@ -88,9 +88,6 @@ angular.module('weeklyScheduler')
               );
             }, []), options);
 
-            // Then resize schedule area knowing the number of weeks in scope
-            el.firstChild.style.width = schedulerCtrl.config.nbWeeks / 53 * 200 + '%';
-
             // Finally, run the sub directives listeners
             schedulerCtrl.$modelChangeListeners.forEach(function (listener) {
               listener(schedulerCtrl.config);
@@ -102,7 +99,10 @@ angular.module('weeklyScheduler')
           // Install mouse scrolling event listener for H scrolling
           mouseScroll(el, 20);
 
-          scope.$on(CLICK_ON_A_CELL, function(e, data) {
+          // Set the init width 
+          el.firstChild.style.width = '100%';
+
+          scope.$on(CLICK_ON_A_CELL, function (e, data) {
             zoomInACell(el, e, data);
           });
 
