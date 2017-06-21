@@ -29,6 +29,10 @@ angular.module('weeklyScheduler')
         //   return Math.floor(percent * element[0].clientWidth + 0.5);
         // };
 
+        var percentToPixel = function (percent) {
+          return (percent / 100) * element[0].clientWidth;
+        };
+
         var pixelToVal = function (pixel) {
           var percent = pixel / element[0].clientWidth;
           return Math.floor(percent * nbHours);
@@ -71,9 +75,13 @@ angular.module('weeklyScheduler')
 
         element.on('mousemove', function (e) {
           var elOffX = element[0].getBoundingClientRect().left;
+          var pixelBarWidth = percentToPixel(hoverElementWidth)
+
+          var left = e.pageX - elOffX - pixelBarWidth / 2
+          var stickyLeft = Math.round(left / pixelBarWidth) * pixelBarWidth
 
           hoverElement.css({
-            left: e.pageX - elOffX - hoverElementWidth / 2 + 'px'
+            left: stickyLeft + 'px'
           });
         });
 
