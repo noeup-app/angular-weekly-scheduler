@@ -173,21 +173,21 @@ angular.module('weeklyScheduler')
             12: 12,
             14: 12,
             16: 18,
-            18: 24,
+            18: 24
           };
 
-          console.log("")
-          console.log("model -> UI - RAW", moment(model.start).format("LLLL"), moment(model.end).format("LLLL"))
+          // console.log("")
+          // console.log("model -> UI - RAW", moment(model.start).format("LLLL"), moment(model.end).format("LLLL"))
 
-          var startHour = moment(model.start).get('hour')
-          var endHour = moment(model.end).get('hour')
+          var startHour = moment(model.start).get('hour');
+          var endHour = moment(model.end).get('hour');
 
-          console.log(startHour, endHour)
+          // console.log(startHour, endHour)
 
-          var startHourTranslateTo = translate[startHour]
-          var endHourTranslateTo = translate[endHour]
+          var startHourTranslateTo = translate[startHour];
+          var endHourTranslateTo = translate[endHour];
 
-          console.log(startHourTranslateTo, endHourTranslateTo)
+          // console.log(startHourTranslateTo, endHourTranslateTo)
 
           if (startHourTranslateTo !== undefined && endHourTranslateTo !== undefined) {
             var start = moment(model.start).clone().set('hour', startHourTranslateTo)
@@ -197,12 +197,12 @@ angular.module('weeklyScheduler')
               start: timeService.dayPreciseDiff(conf.minDate, moment(start), true),
               end: timeService.dayPreciseDiff(conf.minDate, moment(end), true)
             };
-            console.log("ui model -> UI", ui)
+            // console.log("ui model -> UI", ui)
             //$log.debug('FORMATTER :', index, scope.$index, ui);
             return ui;
           }
-          console.log("ERROR while converting model to UI - startHour : " + startHour, "endHour : ", endHour)
-          return { start: -100, end: -100 }
+          // console.log("ERROR while converting model to UI - startHour : " + startHour, "endHour : ", endHour)
+          return { start: -100, end: -100 };
         });
 
         ngModelCtrl.$render = function () {

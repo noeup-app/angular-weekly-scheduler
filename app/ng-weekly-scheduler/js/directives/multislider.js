@@ -38,8 +38,20 @@ angular.module('weeklyScheduler')
           start = start >= 0 ? start : 0;
           end = end <= nbHours ? end : nbHours;
 
-          var startDate = timeService.addHour(conf.minDate, start*6);
-          var endDate = timeService.addHour(conf.minDate, end*6);
+          var indexDay = Math.floor(start/4);
+          var indexHour = start%4;
+
+          var translate = {
+            0: 8,
+            1: 10,
+            2: 14,
+            3: 16
+          };
+
+          var startingHour = translate[indexHour];
+
+          var startDate = timeService.addDay(conf.minDate, indexDay).set('hour', startingHour);
+          var endDate = timeService.addDay(conf.minDate, indexDay).set('hour', startingHour+2);
 
           scope.$apply(function () {
             var item = scope.item;

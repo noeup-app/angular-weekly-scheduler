@@ -19,8 +19,8 @@ angular.module('demoApp', ['ngAnimate', 'weeklyScheduler', 'weeklySchedulerI18N'
           "editable": true,
           "schedules": [
             {
-              "start": "2017-06-20T8:00:00.000Z",
-              "end": "2017-06-20T10:00:00.000Z"
+              "start": "2017-06-20T08:00:00.000+02",
+              "end": "2017-06-20T10:00:00.000+02"
             }
           ]
         },
@@ -28,8 +28,8 @@ angular.module('demoApp', ['ngAnimate', 'weeklyScheduler', 'weeklySchedulerI18N'
             "label": "Item 2",
             "schedules": [
               {
-                "start": "2017-06-21T14:00:00.000Z",
-                "end": "2017-06-21T18:00:00.000Z"
+                "start": "2017-06-21T14:00:00.000+02",
+                "end": "2017-06-21T18:00:00.000+02"
               }
             ]
           }
