@@ -83,7 +83,8 @@ angular.module('weeklyScheduler')
             var pixelOnClick = event.pageX - elOffX;
             var valOnClick = pixelToVal(pixelOnClick);
 
-            var start = Math.round(valOnClick - defaultNewScheduleSize / 2);
+            // var start = Math.round(valOnClick - defaultNewScheduleSize / 2);
+            var start = valOnClick;
             var end = start + 1;
             console.log('elOffX', elOffX);
             console.log('pixelOnClick', pixelOnClick);
