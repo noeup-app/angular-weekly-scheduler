@@ -12,6 +12,7 @@ angular.module('weeklyScheduler')
         var containerEl = element.parent();
         var resizeDirectionIsStart = true;
         var valuesOnDragStart = {start: scope.schedule.start, end: scope.schedule.end};
+        scope.slotText = conf.getSlotText && conf.getSlotText(scope.schedule) || scope.schedule.start + ' - ' + scope.schedule.end;
 
         var pixelToVal = function (pixel) {
           var percent = pixel / containerEl[0].clientWidth;

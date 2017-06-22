@@ -61,13 +61,15 @@
       <pre ng-bind="model | json" style="max-height: 200px;"></pre>
     </div>
 
-    <weekly-scheduler class="scheduler"
-                      items="model.items"
-                      on-change="demo.doSomething"
-                      on-delete="demo.doSomething"
-                      options="model.options">
-      <div class="srow">{{::$index + 1}}. {{item.label}}</div>
-    </weekly-scheduler>
+      <weekly-scheduler 
+        class="scheduler" 
+        items="model.items" 
+        on-change="demo.doSomething" 
+        on-delete="demo.doSomething" 
+        get-slot-text="demo.getSlotText"
+        options="model.options">
+        <div class="srow">{{::$index + 1}}. {{item.label}}</div>
+      </weekly-scheduler>
 
     <div class="pull-right">
       <button class="btn btn-success" role="button" ng-click="model.items.push({label: 'New Item'})">Add new item</button>

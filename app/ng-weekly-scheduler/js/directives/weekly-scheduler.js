@@ -14,7 +14,7 @@ angular.module('weeklyScheduler')
      * @param options
      * @returns {{minDate: *, maxDate: *, nbWeeks: *}}
      */
-    function config(schedules, options) {
+    function config(schedules, options, getSlotText) {
       var now = moment();
 
       // Calculate min date of all scheduled events
@@ -29,7 +29,7 @@ angular.module('weeklyScheduler')
       // Calculate nb of days covered by minDate => maxDate
       var nbDays = timeService.dayDiff(minDate, maxDate);
 
-      var result = angular.extend(options, { minDate: minDate, maxDate: maxDate, nbWeeks: nbWeeks, nbDays: nbDays });
+      var result = angular.extend(options, { minDate: minDate, maxDate: maxDate, nbWeeks: nbWeeks, nbDays: nbDays, getSlotText: getSlotText });
       // Log configuration
       $log.debug('Weekly Scheduler configuration:', result);
 
@@ -60,6 +60,8 @@ angular.module('weeklyScheduler')
         var optionsFn = $parse(attrs.options),
           options = angular.extend(defaultOptions, optionsFn(scope) || {});
 
+        var getSlotText = $parse(attrs.getSlotText)(scope);
+
         // Get the schedule container element
         var el = element[0].querySelector(defaultOptions.selector);
 
@@ -85,7 +87,7 @@ angular.module('weeklyScheduler')
                 (options.monoSchedule ? item.schedules = [schedules[0]] : schedules) :
                 item.schedules = []
               );
-            }, []), options);
+            }, []), options, getSlotText);
 
             // Finally, run the sub directives listeners
             schedulerCtrl.$modelChangeListeners.forEach(function (listener) {
