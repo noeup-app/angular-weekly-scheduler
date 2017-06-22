@@ -79,7 +79,7 @@ angular.module('weeklyScheduler')
             schedulerCtrl.config = config(items.reduce(function (result, item) {
               var schedules = item.schedules;
 
-              return result.concat(schedules && schedules.length ?
+              return result.concat(schedules && Object.keys(schedules).length ?
                 // If in multiSlider mode, ensure a schedule array is present on each item
                 // Else only use first element of schedule array
                 (options.monoSchedule ? item.schedules = [schedules[0]] : schedules) :

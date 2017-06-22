@@ -21,7 +21,7 @@ angular.module('weeklyScheduler')
         var mergeOverlaps = function () {
           var schedule = scope.schedule;
           var schedules = scope.item.schedules;
-          schedules.forEach(function (el) {
+          Object.keys(schedules).forEach(function (_, el) {
             if (el !== schedule) {
               // model is inside another slot
               if (el.end >= schedule.end && el.start <= schedule.start) {

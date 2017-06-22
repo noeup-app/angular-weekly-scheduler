@@ -13,29 +13,77 @@ angular.module('demoApp', ['ngAnimate', 'weeklyScheduler', 'weeklySchedulerI18N'
 
       $scope.model = {
         locale: localeService.$locale.id,
-        options: {/*monoSchedule: true*/},
-        items: [{
-          "label": "Item 1",
-          "editable": true,
-          "schedules": [
-            {
-              "start": "2017-06-20T08:00:00.000+02",
-              "end": "2017-06-20T10:00:00.000+02"
+        options: {/*monoSchedule: true*/ },
+        items: [
+          {
+            "label": "Item 1",
+            "editable": true,
+            "schedules": {
+              'predicted': [{
+                "start": "2017-06-20T08:00:00.000+02",
+                "end": "2017-06-20T10:00:00.000+02"
+              }],
+              'realised': [{
+                "start": "2017-06-20T08:00:00.000+02",
+                "end": "2017-06-20T12:00:00.000+02"
+              }]
             }
-          ]
-        },
+          },
           {
             "label": "Item 2",
-            "schedules": [
-              {
-                "start": "2017-06-21T14:00:00.000+02",
-                "end": "2017-06-21T18:00:00.000+02"
-              }
-            ]
-          }
-      ]};
-
-
+            "editable": true,
+            "schedules": {
+              'predicted': [{
+                "start": "2017-06-20T08:00:00.000+02",
+                "end": "2017-06-20T10:00:00.000+02"
+              }],
+              'realised': [{
+                "start": "2017-06-20T08:00:00.000+02",
+                "end": "2017-06-20T12:00:00.000+02"
+              }]
+            }
+          },
+          // {
+          //   "label": "Item 2",
+          //   "editable": true,
+          //   "schedules": [
+          //     {
+          //       "start": "2017-06-21T14:00:00.000+02",
+          //       "end": "2017-06-21T18:00:00.000+02"
+          //     }
+          //   ]
+          // },
+          // {
+          //   "label": "Item 3",
+          //   "editable": true,
+          //   "schedules": [
+          //     {
+          //       "start": "2017-06-20T14:00:00.000+02",
+          //       "end": "2017-06-20T16:00:00.000+02"
+          //     }
+          //   ]
+          // },
+          // {
+          //   "label": "Item 3",
+          //   "editable": true,
+          //   "schedules": [
+          //     {
+          //       "start": "2017-06-20T16:00:00.000+02",
+          //       "end": "2017-06-20T18:00:00.000+02"
+          //     }
+          //   ]
+          // },
+          // {
+          //   "label": "Item 2",
+          //   "schedules": [
+          //     {
+          //       "start": "2017-06-21T14:00:00.000+02",
+          //       "end": "2017-06-21T18:00:00.000+02"
+          //     }
+          //   ]
+          // },
+        ]
+      };
 
 
       this.doSomething = function (itemIndex, scheduleIndex, scheduleValue) {

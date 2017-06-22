@@ -20,7 +20,10 @@ angular.module('weeklyScheduler')
       link: function (scope, element, attrs, schedulerCtrl) {
         var conf = schedulerCtrl.config;
 
-        var nbHours = conf.nbDays*4;
+        var scheduleName = attrs.schedulename
+        scope.schedulesLenght = Object.keys(scope.item.schedules);
+        scope.scheduleName = scheduleName;
+        var nbHours = conf.nbDays * 4;
         // The default scheduler block size when adding a new item
         var defaultNewScheduleSize = Math.floor(1 / conf.nbDays * 1E8) / 1E6 / 4;
 
@@ -42,8 +45,8 @@ angular.module('weeklyScheduler')
           start = start >= 0 ? start : 0;
           end = end <= nbHours ? end : nbHours;
 
-          var indexDay = Math.floor(start/4);
-          var indexHour = start%4;
+          var indexDay = Math.floor(start / 4);
+          var indexHour = start % 4;
 
           var translate = {
             0: 8,
@@ -55,14 +58,14 @@ angular.module('weeklyScheduler')
           var startingHour = translate[indexHour];
 
           var startDate = timeService.addDay(conf.minDate, indexDay).set('hour', startingHour);
-          var endDate = timeService.addDay(conf.minDate, indexDay).set('hour', startingHour+2);
+          var endDate = timeService.addDay(conf.minDate, indexDay).set('hour', startingHour + 2);
 
           scope.$apply(function () {
             var item = scope.item;
-            if (!item.schedules) {
-              item.schedules = [];
+            if (!item.schedules[scheduleName]) {
+              item.schedules[scheduleName] = [];
             }
-            item.schedules.push({start: startDate.toDate(), end: endDate.toDate()});
+            item.schedules[scheduleName].push({ start: startDate.toDate(), end: endDate.toDate() });
           });
         };
 
@@ -94,11 +97,6 @@ angular.module('weeklyScheduler')
             // var start = Math.round(valOnClick - defaultNewScheduleSize / 2);
             var start = valOnClick;
             var end = start + 1;
-            console.log('elOffX', elOffX);
-            console.log('pixelOnClick', pixelOnClick);
-            console.log('valOnClick', valOnClick);
-            console.log('start', start);
-            console.log('end', end);
 
             addSlot(start, end);
           }
