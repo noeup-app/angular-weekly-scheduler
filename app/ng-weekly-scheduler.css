@@ -165,6 +165,10 @@ multi-slider weekly-slot .remove:hover {
   opacity: 1;
 }
 
+multi-slider .slot-text {
+  overflow: hidden;
+}
+
 multi-slider weekly-slot.active {
   z-index: 10;
   background: #5ab57a;
