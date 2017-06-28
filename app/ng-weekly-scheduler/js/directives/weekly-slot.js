@@ -11,12 +11,15 @@ angular.module('weeklyScheduler')
         var index = scope.$parent.$index;
         var containerEl = element.parent();
         var resizeDirectionIsStart = true;
-        var valuesOnDragStart = {start: scope.schedule.start, end: scope.schedule.end};
+        var valuesOnDragStart = { start: scope.schedule.start, end: scope.schedule.end };
+        var nbHours = conf.nbDays * 4;
+
+        // console.log("scope", scope.schedule)
         scope.slotText = conf.getSlotText && conf.getSlotText(scope.schedule) || scope.schedule.start + ' - ' + scope.schedule.end;
 
         var pixelToVal = function (pixel) {
-          var percent = pixel / containerEl[0].clientWidth;
-          return Math.floor(percent * conf.nbWeeks + 0.5);
+          var percent = pixel / element[0].parentElement.clientWidth;
+          return Math.floor(percent * nbHours);
         };
 
         var mergeOverlaps = function () {
@@ -114,9 +117,9 @@ angular.module('weeklyScheduler')
             var delta = pixelToVal(d);
 
             if (resizeDirectionIsStart) {
-              var newStart = Math.round(valuesOnDragStart.start + delta);
+              var newStart = valuesOnDragStart.start + (delta / 4);
 
-              if (ui.start !== newStart && newStart <= ui.end - 1 && newStart >= 0) {
+              if (ui.start !== newStart && newStart <= ui.end - (1/4) && newStart >= 0) {
                 ngModelCtrl.$setViewValue({
                   start: newStart,
                   end: ui.end
@@ -124,9 +127,9 @@ angular.module('weeklyScheduler')
                 ngModelCtrl.$render();
               }
             } else {
-              var newEnd = Math.round(valuesOnDragStart.end + delta);
+              var newEnd = valuesOnDragStart.end + ((delta + 1) / 4);
 
-              if (ui.end !== newEnd && newEnd >= ui.start + 1 && newEnd <= conf.nbWeeks) {
+              if (ui.end !== newEnd && newEnd >= ui.start + (1/4) && newEnd <= nbHours) {
                 ngModelCtrl.$setViewValue({
                   start: ui.start,
                   end: newEnd
