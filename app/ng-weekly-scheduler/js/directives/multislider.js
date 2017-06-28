@@ -60,17 +60,17 @@ angular.module('weeklyScheduler')
           var startDate = timeService.addDay(conf.minDate, indexDay).set('hour', startingHour);
           var endDate = timeService.addDay(conf.minDate, indexDay).set('hour', startingHour + 2);
 
-          scope.$apply(function () {
-            var item = scope.item;
-            if (!item.schedules[scheduleName]) {
-              item.schedules[scheduleName] = [];
-            }
-            var schedule = { start: startDate.toDate(), end: endDate.toDate(), meta: slotMeta }
-            item.schedules[scheduleName].push(schedule);
-            
-            schedulerCtrl.on.change(scope.$parent.$index, scheduleName, schedule);
-            
-          });
+          
+          var item = scope.item;
+          if (!item.schedules[scheduleName]) {
+            item.schedules[scheduleName] = [];
+          }
+          var schedule = { start: startDate.toDate(), end: endDate.toDate(), meta: slotMeta }
+          item.schedules[scheduleName].push(schedule);
+
+          schedulerCtrl.on.change(scope.$parent.$index, scheduleName, schedule);
+
+          if (!scope.$$phase) scope.$apply();
         };
 
         var hoverElement = angular.element(element.find('div')[0]);
