@@ -41,7 +41,7 @@ angular.module('weeklyScheduler')
           return Math.floor(percent * nbHours);
         };
 
-        var addSlot = function (start, end) {
+        var addSlot = function (start, end, slotMeta) {
           start = start >= 0 ? start : 0;
           end = end <= nbHours ? end : nbHours;
 
@@ -65,7 +65,8 @@ angular.module('weeklyScheduler')
             if (!item.schedules[scheduleName]) {
               item.schedules[scheduleName] = [];
             }
-            item.schedules[scheduleName].push({ start: startDate.toDate(), end: endDate.toDate() });
+            var schedule = { start: startDate.toDate(), end: endDate.toDate(), meta: slotMeta }
+            var slotIndex = item.schedules[scheduleName].push(schedule) - 1;
           });
         };
 
@@ -98,7 +99,11 @@ angular.module('weeklyScheduler')
             var start = valOnClick;
             var end = start + 1;
 
-            addSlot(start, end);
+            conf.onSlotAdded(function(slotMeta){
+              console.log("slotMeta", slotMeta)
+
+              addSlot(start, end, slotMeta);
+            });
           }
         });
       }
