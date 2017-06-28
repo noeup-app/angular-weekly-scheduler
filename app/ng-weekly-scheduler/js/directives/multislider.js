@@ -67,6 +67,9 @@ angular.module('weeklyScheduler')
             }
             var schedule = { start: startDate.toDate(), end: endDate.toDate(), meta: slotMeta }
             var slotIndex = item.schedules[scheduleName].push(schedule) - 1;
+            
+            schedulerCtrl.on.change(element.index, slotIndex, schedule);
+            
           });
         };
 
