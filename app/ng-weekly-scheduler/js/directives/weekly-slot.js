@@ -54,7 +54,8 @@ angular.module('weeklyScheduler')
         var deleteSelf = function () {
           containerEl.removeClass('dragging');
           containerEl.removeClass('slot-hover');
-          scope.item.schedules.splice(scope.item.schedules.indexOf(scope.schedule), 1);
+          var multiSliderName = scope.$parent.scheduleName
+          scope.item.schedules[multiSliderName].splice(scope.item.schedules[multiSliderName].indexOf(scope.schedule), 1);
           containerEl.find('weekly-slot').remove();
           scope.$apply();
         };
