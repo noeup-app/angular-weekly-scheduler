@@ -13,6 +13,7 @@ angular.module('weeklyScheduler')
         var resizeDirectionIsStart = true;
         var valuesOnDragStart = { start: scope.schedule.start, end: scope.schedule.end };
         var nbHours = conf.nbDays * 4;
+        var multiSliderName = scope.$parent.scheduleName;
 
         // console.log("scope", scope.schedule)
         scope.slotText = conf.getSlotText && conf.getSlotText(scope.schedule) || scope.schedule.start + ' - ' + scope.schedule.end;
@@ -24,8 +25,8 @@ angular.module('weeklyScheduler')
 
         var mergeOverlaps = function () {
           var schedule = scope.schedule;
-          var schedules = scope.item.schedules;
-          Object.keys(schedules).forEach(function (_, el) {
+          var schedules = scope.item.schedules[multiSliderName];
+          schedules.forEach(function (el) {
             if (el !== schedule) {
               // model is inside another slot
               if (el.end >= schedule.end && el.start <= schedule.start) {
@@ -57,7 +58,7 @@ angular.module('weeklyScheduler')
         var deleteSelf = function () {
           containerEl.removeClass('dragging');
           containerEl.removeClass('slot-hover');
-          var multiSliderName = scope.$parent.scheduleName
+          
           scope.item.schedules[multiSliderName].splice(scope.item.schedules[multiSliderName].indexOf(scope.schedule), 1);
           containerEl.find('weekly-slot').remove();
           scope.$apply();
@@ -144,10 +145,10 @@ angular.module('weeklyScheduler')
             var delta = pixelToVal(d);
             var duration = valuesOnDragStart.end - valuesOnDragStart.start;
 
-            var newStart = Math.round(valuesOnDragStart.start + delta);
-            var newEnd = Math.round(newStart + duration);
+            var newStart = valuesOnDragStart.start + (delta / 4);
+            var newEnd = newStart + duration;
 
-            if (ui.start !== newStart && newStart >= 0 && newEnd <= conf.nbWeeks) {
+            if (ui.start !== newStart && newStart >= 0 && newEnd <= nbHours) {
               ngModelCtrl.$setViewValue({
                 start: newStart,
                 end: newEnd
