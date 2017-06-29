@@ -14,7 +14,7 @@ angular.module('weeklyScheduler')
      * @param options
      * @returns {{minDate: *, maxDate: *, nbWeeks: *}}
      */
-    function config(schedules, options, getSlotText, onSlotAdded) {
+    function config(schedules, options, getSlotText, onSlotAdded, shouldMergeTwoSlots) {
       var now = moment();
 
       // Calculate min date of all scheduled events
@@ -29,7 +29,15 @@ angular.module('weeklyScheduler')
       // Calculate nb of days covered by minDate => maxDate
       var nbDays = timeService.dayDiff(minDate, maxDate);
 
-      var result = angular.extend(options, { minDate: minDate, maxDate: maxDate, nbWeeks: nbWeeks, nbDays: nbDays, getSlotText: getSlotText, onSlotAdded: onSlotAdded });
+      var result = angular.extend(options, { 
+        minDate: minDate,
+        maxDate: maxDate,
+        nbWeeks: nbWeeks,
+        nbDays: nbDays,
+        getSlotText: getSlotText,
+        onSlotAdded: onSlotAdded,
+        shouldMergeTwoSlots: shouldMergeTwoSlots 
+      });
       // Log configuration
       $log.debug('Weekly Scheduler configuration:', result);
 
@@ -62,6 +70,7 @@ angular.module('weeklyScheduler')
 
         var getSlotText = $parse(attrs.getSlotText)(scope);
         var onSlotAdded = $parse(attrs.onSlotAdded)(scope);
+        var shouldMergeTwoSlots = $parse(attrs.shouldMergeTwoSlots)(scope);
 
         // Get the schedule container element
         var el = element[0].querySelector(defaultOptions.selector);
@@ -88,7 +97,7 @@ angular.module('weeklyScheduler')
                 (options.monoSchedule ? item.schedules = [schedules[0]] : schedules) :
                 item.schedules = []
               );
-            }, []), options, getSlotText, onSlotAdded);
+            }, []), options, getSlotText, onSlotAdded, shouldMergeTwoSlots);
 
             // Finally, run the sub directives listeners
             schedulerCtrl.$modelChangeListeners.forEach(function (listener) {

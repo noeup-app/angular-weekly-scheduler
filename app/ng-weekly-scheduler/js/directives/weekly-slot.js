@@ -28,6 +28,11 @@ angular.module('weeklyScheduler')
           var schedules = scope.item.schedules[multiSliderName];
           schedules.forEach(function (el) {
             if (el !== schedule) {
+
+              if (! conf.shouldMergeTwoSlots(el, schedule)){
+                return;
+              }
+
               // model is inside another slot
               if (el.end >= schedule.end && el.start <= schedule.start) {
                 schedules.splice(schedules.indexOf(el), 1);
