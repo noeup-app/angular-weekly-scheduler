@@ -26,6 +26,71 @@ angular.module('weeklyScheduler')
         var mergeOverlaps = function () {
           var schedule = scope.schedule;
           var schedules = scope.item.schedules[multiSliderName];
+
+          // two edge cases : 
+          //  - 1) other is the last slot of the previous day and current is the first of this day
+          //  - 2) other is the second of the day and current is the third
+          var isTheOtherSlotEndInsideCurrentModel = function(other, current){
+            var otherEnd = moment(other.end);
+            var currentStart = moment(current.start);
+
+            var dayDiff = 
+              moment(current.start).startOf('day')
+               .diff(moment(other.end).startOf('day'), 'day');
+
+            var othersEndHour = otherEnd.get('hour');
+            var currentsStartHour = currentStart.get('hour');
+
+            // basic case
+            if(other.end >= current.start){
+              return true;
+            }
+
+            // edge case 2)
+            if(dayDiff == 0 && othersEndHour == 12 && currentsStartHour == 14){
+              return true;
+            }
+
+
+            // edge case 1)
+            if(dayDiff == 1 && othersEndHour == 18 && currentsStartHour == 8){
+              return true;
+            }
+            return false;
+          }
+
+          // two edge cases : 
+          //  - 1) other is the first slot of the next day and current is the last of this day
+          //  - 2) other is the second of the day and current is the third
+          var isTheOtherSlotStartInsideCurrentModel = function(other, current){
+            var otherStart = moment(other.start);
+            var currentEnd = moment(current.end);
+
+            var dayDiff = 
+              moment(other.start).startOf('day')
+               .diff(moment(current.end).startOf('day'), 'day');
+
+            var othersStartHour = otherStart.get('hour');
+            var currentsEndHour = currentEnd.get('hour');
+
+            // basic case
+            if(other.start <= current.end){
+              return true;
+            }
+
+            // edge case 2)
+            if(dayDiff == 0 && othersStartHour == 14 && currentsEndHour == 12){
+              return true;
+            }
+
+            console.log("dayDiff", dayDiff)
+            // edge case 1)
+            if(dayDiff == 1 && othersStartHour == 8 && currentsEndHour == 18){
+              return true;
+            }
+            return false;
+          }
+
           schedules.forEach(function (el) {
             if (el !== schedule) {
 
@@ -35,21 +100,25 @@ angular.module('weeklyScheduler')
 
               // model is inside another slot
               if (el.end >= schedule.end && el.start <= schedule.start) {
+                console.log("model is inside another slot, merging...")
                 schedules.splice(schedules.indexOf(el), 1);
                 schedule.end = el.end;
                 schedule.start = el.start;
               }
               // model completely covers another slot
               else if (schedule.end >= el.end && schedule.start <= el.start) {
+                console.log("model completely covers another slot, merging...")
                 schedules.splice(schedules.indexOf(el), 1);
               }
               // another slot's end is inside current model
-              else if (el.end >= schedule.start && el.end <= schedule.end) {
+              else if (isTheOtherSlotEndInsideCurrentModel(el, schedule) && el.end <= schedule.end) {
+                console.log("another slot's end is inside current model, merging...")
                 schedules.splice(schedules.indexOf(el), 1);
                 schedule.start = el.start;
               }
               // another slot's start is inside current model
-              else if (el.start >= schedule.start && el.start <= schedule.end) {
+              else if (el.start >= schedule.start && isTheOtherSlotStartInsideCurrentModel(el, schedule)) {
+                console.log("another slot's start is inside current model, merging...")
                 schedules.splice(schedules.indexOf(el), 1);
                 schedule.end = el.end;
               }
