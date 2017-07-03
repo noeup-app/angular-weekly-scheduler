@@ -99,4 +99,58 @@ describe('time service test', function () {
       expect(nbDayInYear).toEqual(nbDayInYearExpected);
     });
   });
+
+  describe('addDayAndWeekEnd', function(){
+
+    function addDayAndWeekEndTest(startDate, nbDaysToAdd, expectedDate){
+      var res = timeService.addDayAndWeekEnd(moment(startDate), nbDaysToAdd)
+      var expected = moment(expectedDate)
+      var r = res.isSame(expected, 'day')
+      if(! r){
+        console.log("Error : ", res.format('LLLL'), " different than ", expectedDate)
+      }
+      expect(r).toEqual(true);
+    }
+
+    it('should work when you start on monday and add 0 day', function () {
+      addDayAndWeekEndTest("2017-06-05", 0, "2017-06-05")
+    });
+
+    it('should work when you start on monday and add 1 day', function () {
+      addDayAndWeekEndTest("2017-06-05", 1, "2017-06-06")
+    });
+
+    it('should work when you start on monday and add 4 day', function () {
+      addDayAndWeekEndTest("2017-06-05", 4, "2017-06-09")
+    });
+
+    it('should work when you start on monday and add 5 day', function () {
+      addDayAndWeekEndTest("2017-06-05", 5, "2017-06-12")
+    });
+
+    it('should work when you start on monday and add 10 day', function () {
+      addDayAndWeekEndTest("2017-06-05", 10, "2017-06-19")
+    });
+
+    it('should work when you start on wednesday and add 10 day', function () {
+      addDayAndWeekEndTest("2017-06-07", 10, "2017-06-21")
+    });
+
+    it('should work when you start on friday and add 1 day', function () {
+      addDayAndWeekEndTest("2017-06-09", 1, "2017-06-12")
+    });
+
+    it('should work when you start on thursday and add 1 day', function () {
+      addDayAndWeekEndTest("2017-06-06", 1, "2017-06-07")
+    });
+  })
+
+  describe('weekDistribution', function(){
+
+    it('should have 12 weeks', function () {
+      var weeks = timeService.weekDistribution(moment("2017-05-02"), moment("2017-07-19"))
+      expect(weeks.length).toEqual(12)
+    });
+
+  })
 });

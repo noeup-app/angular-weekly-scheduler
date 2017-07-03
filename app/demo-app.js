@@ -86,9 +86,26 @@ angular.module('demoApp', ['ngAnimate', 'weeklyScheduler', 'weeklySchedulerI18N'
       };
 
 
+      this.getSlotText = function(schedule){
+        console.log("schedule",schedule)
+        return schedule.meta.project + ' (' + schedule.meta.client + ')';
+      }
+
+      this.onSlotAdded = function(cb){
+        console.log("onSlotAdded")
+        cb({
+          project: "Project X",
+          client: "Client Y"
+        });
+      }
+
       this.doSomething = function (itemIndex, scheduleIndex, scheduleValue) {
         $log.debug('The model has changed!', itemIndex, scheduleIndex, scheduleValue);
       };
+
+      this.shouldMergeTwoSlots = function(slot1, slot2){
+        return slot1.meta.project === slot2.meta.project && slot1.meta.client === slot2.meta.client
+      }
 
       this.onLocaleChange = function () {
         $log.debug('The locale is changing to', $scope.model.locale);

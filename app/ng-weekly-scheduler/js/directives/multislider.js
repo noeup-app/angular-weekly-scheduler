@@ -57,8 +57,8 @@ angular.module('weeklyScheduler')
 
           var startingHour = translate[indexHour];
 
-          var startDate = timeService.addDay(conf.minDate, indexDay).set('hour', startingHour);
-          var endDate = timeService.addDay(conf.minDate, indexDay).set('hour', startingHour + 2);
+          var startDate = timeService.addDayAndWeekEnd(conf.minDate, indexDay).set('hour', startingHour);
+          var endDate = timeService.addDayAndWeekEnd(conf.minDate, indexDay).set('hour', startingHour + 2);
 
           
           var item = scope.item;

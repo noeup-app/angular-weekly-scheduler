@@ -45,11 +45,14 @@ angular.module('weeklyScheduler')
       dayPreciseDiff: function (start, end) {
         return end.clone().diff(start.clone(), DAY, true);
       },
+      dayPreciseDiffWithoutWeekend: function (start, end) {
+        var nbDayWeekEnd = this.nbWeedEndDays(start, end);
+        return end.clone().diff(start.clone(), DAY, true) - nbDayWeekEnd;
+      },
       isWeekEnd: function (date) {
         return date.isoWeekday() === 6 || date.isoWeekday() === 7;
       },
       dayDiff: function (start, end) {
-        console.log('dayDiff', start.format('LLLL'), end.format('LLLL'));
         var date = start.clone().startOf(DAY);
         var nbDay = 0;
         while (end.clone().endOf(DAY) > date) {
@@ -59,6 +62,20 @@ angular.module('weeklyScheduler')
           date = date.add(1, DAY);
         }
         return nbDay;
+      },
+      nbWeedEndDays: function(from, to){
+        var startWeek = from.clone().startOf(WEEK);
+        var nbDayStartWeek = 
+          to.clone().startOf(DAY)
+            .diff(startWeek.clone().startOf(DAY), DAY);
+
+        // 5 day in a working week + 2 days in the we
+        return Math.floor(Math.abs(nbDayStartWeek) / 5) * 2;
+      },
+      addDayAndWeekEnd: function (moment, nbDay) {
+        var dateInit = moment.clone().add(nbDay, DAY);
+        var nbDayWeekEnd = this.nbWeedEndDays(moment, dateInit)
+        return dateInit.clone().add(nbDayWeekEnd, DAY)
       },
       weekDiff: function (start, end) {
         return end.clone().endOf(WEEK).diff(start.clone().startOf(WEEK), WEEK) + 1;

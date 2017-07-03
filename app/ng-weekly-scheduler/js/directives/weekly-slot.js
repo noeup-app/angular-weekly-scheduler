@@ -237,8 +237,36 @@ angular.module('weeklyScheduler')
 
         //// UI -> model ////////////////////////////////////
         ngModelCtrl.$parsers.push(function onUIChange(ui) {
-          ngModelCtrl.$modelValue.start = timeService.addWeek(conf.minDate, ui.start).toDate();
-          ngModelCtrl.$modelValue.end = timeService.addWeek(conf.minDate, ui.end).toDate();
+          var indexStartDay = Math.floor(ui.start);
+          var indexStartHour = ui.start % 1;
+
+          var indexEndDay = Math.floor(ui.end - (1/4));
+          var indexEndHour = (ui.end - (1/4)) % 1;
+
+          var translateStart = {
+            0: 8,
+            1: 10,
+            2: 14,
+            3: 16
+          };
+          var translateEnd = {
+            0: 10,
+            1: 12,
+            2: 16,
+            3: 18
+          };
+
+          var startingHour = translateStart[indexStartHour * 4];
+          var endingHour = translateEnd[indexEndHour * 4];
+
+          console.log("ui.end",ui.end)
+          console.log("indexStartDay", indexStartDay, "indexStartHour", indexStartHour, indexStartHour * 4, "startingHour", startingHour)
+          console.log("indexEndDay", indexEndDay, "indexEndHour", indexEndHour, indexEndHour * 4, "endingHour", endingHour)
+
+
+          ngModelCtrl.$modelValue.start = timeService.addDayAndWeekEnd(conf.minDate, indexStartDay).set('hour', startingHour).toDate();
+          ngModelCtrl.$modelValue.end = timeService.addDayAndWeekEnd(conf.minDate, indexEndDay).set('hour', endingHour).toDate();
+
           //$log.debug('PARSER :', ngModelCtrl.$modelValue.$$hashKey, index, scope.$index, ngModelCtrl.$modelValue);
           schedulerCtrl.on.change(index, scope.$index, ngModelCtrl.$modelValue);
           return ngModelCtrl.$modelValue;
