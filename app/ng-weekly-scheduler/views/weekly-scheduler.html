@@ -26,7 +26,7 @@
     </div>
 
     <div class="schedule-animate" ng-repeat="item in schedulerCtrl.items">
-      <div class="srow" ng-repeat="(scheduleName, schedule) in item.schedules">
+      <div class="srow" ng-repeat="(scheduleName, schedule) in item.schedules track by $index">
         <hour-grid class="grid-container striped" no-text></hour-grid>
         <multi-slider index="{{$index}}" scheduleName="{{scheduleName}}"></multi-slider>
       </div>

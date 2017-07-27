@@ -65,7 +65,7 @@ angular.module('weeklyScheduler')
       },
       nbWeedEndDays: function(from, to){
         var startWeek = from.clone().startOf(WEEK);
-        var nbDayStartWeek = 
+        var nbDayStartWeek =
           to.clone().startOf(DAY)
             .diff(startWeek.clone().startOf(DAY), DAY);
 
@@ -158,15 +158,36 @@ angular.module('weeklyScheduler')
         var startDate = minDate.clone();
         var endDate = maxDate.clone();
         var dayDiff = this.dayDiff(startDate, endDate);
-        var monthDiff = this.monthDiff(startDate, endDate);
+        var currentDay = startDate.add(8, HOUR).startOf(HOUR);
+        var translate = {
+          0: {
+            0.25: 8,
+            0.75: 18
+          },
+          0.25: {
+            0.50: 10,
+            0: 10
+          },
+          0.50: {
+            0.75: 14,
+            0.25: 12
+          },
+          0.75: {
+            0: 16,
+            0.50: 16
+          }
+        };
 
-        for (i = 0; i < (dayDiff*4); i++) {
-
-          var startOfHour = i === 0 ? startDate : startDate.add(1, MONTH).startOf(MONTH);
-          var endOfHour = i === monthDiff - 1 ? endDate : startDate.clone().endOf(MONTH);
+        for (i = 0; i < (dayDiff * 4); i++) {
           var width = Math.floor(1 / dayDiff * 1E8) / 1E6 / 4;
+          var rangeStart = (i / 4) - Math.floor(i / 4);
+          var rangeEnd = ((i + 1) / 4) - Math.floor((i + 1) / 4);
+          var startOfHour = currentDay = currentDay.clone().set({hours: parseInt(translate[rangeStart][rangeEnd], 10)}).startOf(HOUR);
+          var endOfHour = currentDay = currentDay.clone().set({hours: parseInt(translate[rangeEnd][rangeStart], 10)}).startOf(HOUR);
+          var addDays = (i !== 0 && (i+1) % 20 === 0) ? 3 : (rangeStart === 0.75)? 1 : 0; //Go to the next day or next monday's week
 
           result.push({start: startOfHour.clone(), end: endOfHour.clone(), width: width});
+          currentDay = (addDays !== 0) ? currentDay.add(addDays, DAY).startOf(DAY).add(8, HOUR).startOf(HOUR) : currentDay;
         }
         return result;
       }

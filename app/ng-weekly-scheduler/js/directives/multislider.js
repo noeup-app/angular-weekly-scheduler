@@ -20,9 +20,10 @@ angular.module('weeklyScheduler')
       link: function (scope, element, attrs, schedulerCtrl) {
         var conf = schedulerCtrl.config;
 
-        var scheduleName = attrs.schedulename
+        var scheduleName = attrs.schedulename;
         scope.schedulesLenght = Object.keys(scope.item.schedules);
         scope.scheduleName = scheduleName;
+        var scheduleIndex = attrs.index;
         var nbHours = conf.nbDays * 4;
         // The default scheduler block size when adding a new item
         var defaultNewScheduleSize = Math.floor(1 / conf.nbDays * 1E8) / 1E6 / 4;
@@ -68,7 +69,9 @@ angular.module('weeklyScheduler')
           var schedule = { start: startDate.toDate(), end: endDate.toDate(), meta: slotMeta }
           item.schedules[scheduleName].push(schedule);
 
-          schedulerCtrl.on.change(scope.$parent.$index, scheduleName, schedule);
+          console.log("THis is the new schedule ", schedule);
+
+          schedulerCtrl.on.change(scheduleIndex, scheduleName, schedule);
 
           if (!scope.$$phase) scope.$apply();
         };

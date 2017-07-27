@@ -18,10 +18,10 @@ angular.module('weeklyScheduler')
       var now = moment();
 
       // Calculate min date of all scheduled events
-      var minDate = moment().add(- 1, 'month').startOf('week');
+      var minDate = moment().add(- 1, 'month').startOf('week').add(1, 'day');
 
       // Calculate max date of all scheduled events
-      var maxDate = moment().add(1, 'month').endOf('week');
+      var maxDate = moment().add(1, 'month').endOf('week').subtract(1, 'day');
 
       // Calculate nb of weeks covered by minDate => maxDate
       var nbWeeks = timeService.weekDiff(minDate, maxDate);
