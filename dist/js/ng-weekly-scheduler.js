@@ -304,10 +304,360 @@ angular.module('weeklyScheduler')
     };
   }]);
 angular.module('weeklyScheduler')
+
+  .directive('hourlySlot', ['weeklySchedulerTimeService', function (timeService) {
+    return {
+      restrict: 'E',
+      require: ['^weeklyScheduler', 'ngModel'],
+      templateUrl: 'ng-weekly-scheduler/views/hourly-slot.html',
+      link: function (scope, element, attrs, ctrls) {
+        var schedulerCtrl = ctrls[0], ngModelCtrl = ctrls[1];
+        var conf = schedulerCtrl.config;
+        var index = scope.$parent.$index;
+        var containerEl = element.parent();
+        var resizeDirectionIsStart = true;
+        var valuesOnDragStart = {start: scope.schedule.start, end: scope.schedule.end};
+        var nbHours = conf.nbDays * 4;
+        var multiSliderName = scope.$parent.scheduleName;
+        var hours = timeService.hourDistribution(schedulerCtrl.config.minDate, schedulerCtrl.config.maxDate);
+
+        scope.slotText = conf.getSlotText && conf.getSlotText(scope.schedule) || scope.schedule.start + ' - ' + scope.schedule.end;
+
+        var pixelToVal = function (pixel) {
+          var percent = pixel / element[0].parentElement.clientWidth;
+          return Math.floor(percent * nbHours);
+        };
+
+        var mergeOverlaps = function () {
+          var schedule = scope.schedule;
+          var schedules = scope.item.schedules[multiSliderName];
+
+          // two edge cases : 
+          //  - 1) other is the last slot of the previous day and current is the first of this day
+          //  - 2) other is the second of the day and current is the third
+          var isTheOtherSlotEndInsideCurrentModel = function (other, current) {
+            var otherEnd = moment(other.end);
+            var currentStart = moment(current.start);
+
+            var dayDiff =
+              moment(current.start).startOf('day')
+                .diff(moment(other.end).startOf('day'), 'day');
+
+            var othersEndHour = otherEnd.get('hour');
+            var currentsStartHour = currentStart.get('hour');
+
+            // basic case
+            if (other.end >= current.start) {
+              return true;
+            }
+
+            // edge case 2)
+            if (dayDiff == 0 && othersEndHour == 12 && currentsStartHour == 14) {
+              return true;
+            }
+
+
+            // edge case 1)
+            if (dayDiff == 1 && othersEndHour == 18 && currentsStartHour == 8) {
+              return true;
+            }
+            return false;
+          }
+
+          // two edge cases : 
+          //  - 1) other is the first slot of the next day and current is the last of this day
+          //  - 2) other is the second of the day and current is the third
+          var isTheOtherSlotStartInsideCurrentModel = function (other, current) {
+            var otherStart = moment(other.start);
+            var currentEnd = moment(current.end);
+
+            var dayDiff =
+              moment(other.start).startOf('day')
+                .diff(moment(current.end).startOf('day'), 'day');
+
+            var othersStartHour = otherStart.get('hour');
+            var currentsEndHour = currentEnd.get('hour');
+
+            // basic case
+            if (other.start <= current.end) {
+              return true;
+            }
+
+            // edge case 2)
+            if (dayDiff == 0 && othersStartHour == 14 && currentsEndHour == 12) {
+              return true;
+            }
+
+            console.log("dayDiff:::", dayDiff)
+            // edge case 1)
+            if (dayDiff == 1 && othersStartHour == 8 && currentsEndHour == 18) {
+              return true;
+            }
+            return false;
+          }
+
+          schedules.forEach(function (el) {
+            if (el !== schedule) {
+
+              if (!conf.shouldMergeTwoSlots(el, schedule)) {
+                console.log("your merging condition returned false, abort...", el, schedule, schedules)
+                return;
+              }
+
+              // model is inside another slot
+              if (el.end >= schedule.end && el.start <= schedule.start) {
+                console.log("model is inside another slot, merging...")
+                schedules.splice(schedules.indexOf(el), 1);
+                schedule.end = el.end;
+                schedule.start = el.start;
+              }
+              // model completely covers another slot
+              else if (schedule.end >= el.end && schedule.start <= el.start) {
+                console.log("model completely covers another slot, merging...")
+                schedules.splice(schedules.indexOf(el), 1);
+              }
+              // another slot's end is inside current model
+              else if (isTheOtherSlotEndInsideCurrentModel(el, schedule) && el.end <= schedule.end) {
+                console.log("another slot's end is inside current model, merging...")
+                schedules.splice(schedules.indexOf(el), 1);
+                schedule.start = el.start;
+              }
+              // another slot's start is inside current model
+              else if (el.start >= schedule.start && isTheOtherSlotStartInsideCurrentModel(el, schedule)) {
+                console.log("another slot's start is inside current model, merging...")
+                schedules.splice(schedules.indexOf(el), 1);
+                schedule.end = el.end;
+              }
+            }
+          });
+        };
+
+        /**
+         * Delete on right click on slot
+         */
+        var deleteSelf = function () {
+          containerEl.removeClass('dragging');
+          containerEl.removeClass('slot-hover');
+
+          scope.item.schedules[multiSliderName].splice(scope.item.schedules[multiSliderName].indexOf(scope.schedule), 1);
+          containerEl.find('hourly-slot').remove();
+          scope.$apply();
+        };
+
+        element.find('span').on('click', function (e) {
+          e.preventDefault();
+          deleteSelf();
+        });
+
+        element.on('mouseover', function () {
+          containerEl.addClass('slot-hover');
+        });
+
+        element.on('mouseleave', function () {
+          containerEl.removeClass('slot-hover');
+        });
+
+
+        if (scope.item.editable !== false) {
+          scope.startResizeStart = function () {
+            resizeDirectionIsStart = true;
+            scope.startDrag();
+          };
+
+          scope.startResizeEnd = function () {
+            resizeDirectionIsStart = false;
+            scope.startDrag();
+          };
+
+          scope.startDrag = function () {
+            element.addClass('active');
+
+            containerEl.addClass('dragging');
+            containerEl.attr('no-add', true);
+
+            valuesOnDragStart = {start: ngModelCtrl.$viewValue.start, end: ngModelCtrl.$viewValue.end};
+          };
+
+          scope.endDrag = function () {
+
+            // this prevents user from accidentally
+            // adding new slot after resizing or dragging
+            setTimeout(function () {
+              containerEl.removeAttr('no-add');
+            }, 500);
+
+            element.removeClass('active');
+            containerEl.removeClass('dragging');
+
+            mergeOverlaps();
+            scope.$apply();
+          };
+
+          scope.resize = function (d) {
+            var ui = ngModelCtrl.$viewValue;
+            var delta = pixelToVal(d);
+
+
+            if (resizeDirectionIsStart) {
+              var newStart = valuesOnDragStart.start + (delta / 4);
+
+              if (ui.start !== newStart && newStart <= ui.end - (1 / 4) && newStart >= 0) {
+
+
+                ngModelCtrl.$setViewValue({
+                  start: newStart,
+                  end: ui.end
+                });
+
+                console.log("---- RESIZE ----");
+                console.log("new values", newStart);
+                console.log("new values", ui.end);
+
+                ngModelCtrl.$render();
+              }
+            } else {
+              var newEnd = valuesOnDragStart.end + ((delta + 1) / 4);
+
+              if (ui.end !== newEnd && newEnd >= ui.start + (1 / 4) && newEnd <= nbHours) {
+
+                ngModelCtrl.$setViewValue({
+                  start: ui.start,
+                  end: newEnd
+                });
+                ngModelCtrl.$render();
+              }
+            }
+          };
+
+          scope.drag = function (d) {
+            var ui = ngModelCtrl.$viewValue;
+            var delta = pixelToVal(d);
+            var duration = valuesOnDragStart.end - valuesOnDragStart.start;
+
+            var newStart = valuesOnDragStart.start + (delta / 4);
+            var newEnd = newStart + duration;
+
+            if (ui.start !== newStart && newStart >= 0 && newEnd <= nbHours) {
+              ngModelCtrl.$setViewValue({
+                start: newStart,
+                end: newEnd
+              });
+
+
+              ngModelCtrl.$render();
+            }
+          };
+        }
+
+        // on init, merge overlaps
+        mergeOverlaps(true);
+
+        //// UI -> model ////////////////////////////////////
+        ngModelCtrl.$parsers.push(function onUIChange(ui) {
+
+          var translate = {
+            end: {
+              0: 18,
+              0.75: 14,
+              0.50: 12,
+              0.25: 10
+            }
+          };
+
+          var endOfSlot = ((ui.end + 1) % 4) - Math.floor((ui.end + 1) % 4);
+          var endToTranslate = translate.end[endOfSlot];
+
+          ngModelCtrl.$modelValue.start = hours[ui.start * 4].start;
+          ngModelCtrl.$modelValue.end = (endToTranslate === 18 || endToTranslate === 12) ? hours[(ui.end * 4) - 1].end : hours[ui.end * 4].start;
+
+          ngModelCtrl.$modelValue.start = ngModelCtrl.$modelValue.start.toDate(); //Equivalent to moment(ngModelCtrl.$modelValue.start).utc().format();
+          ngModelCtrl.$modelValue.end = ngModelCtrl.$modelValue.end.toDate(); // Equivalent to moment(ngModelCtrl.$modelValue.end).utc().format();
+
+          schedulerCtrl.on.change(index, scope.$index, ngModelCtrl.$modelValue);
+
+          return ngModelCtrl.$modelValue;
+        });
+
+        //// model -> UI ////////////////////////////////////
+        ngModelCtrl.$formatters.push(function onModelChange(model) {
+
+          var translate = {
+            8: 0,
+            10: 6,
+            12: 12,
+            14: 12,
+            16: 18,
+            18: 24
+          };
+
+          // console.log("---- model -----", model)
+          // console.log("model -> UI - RAW", moment(model.start).format("LLLL"), moment(model.end).format("LLLL"))
+
+          var startHour = moment(model.start).get('hour');
+          var endHour = moment(model.end).get('hour');
+
+          // console.log("1", startHour, endHour)
+
+          var startHourTranslateTo = translate[startHour];
+          var endHourTranslateTo = translate[endHour];
+
+          // console.log("2", startHourTranslateTo, endHourTranslateTo)
+
+          if (startHourTranslateTo !== undefined && endHourTranslateTo !== undefined) {
+            var start = moment(model.start).clone().set('hour', startHourTranslateTo)
+            var end = moment(model.end).clone().set('hour', endHourTranslateTo)
+            // console.log("model -> UI", start.format("LLLL"), end.format("LLLL"))
+            var ui = {
+              start: timeService.dayPreciseDiff(conf.minDate, moment(start), true),
+              end: timeService.dayPreciseDiff(conf.minDate, moment(end), true)
+            };
+            // console.log("ui model -> UI", ui)
+            // console.log("----")
+
+            //$log.debug('FORMATTER :', index, scope.$index, ui);
+            return ui;
+          }
+          // console.log("ERROR while converting model to UI - startHour : " + startHour, "endHour : ", endHour)
+          return {start: -100, end: -100};
+        });
+
+        ngModelCtrl.$render = function () {
+          var ui = ngModelCtrl.$viewValue;
+          var css = {
+            left: ui.start / conf.nbDays * 100 + '%',
+            width: (ui.end - ui.start) / conf.nbDays * 100 + '%'
+          };
+
+
+          //$log.debug('RENDER :', index, scope.$index, css);
+          element.css(css);
+        };
+
+        scope.$on('weeklySchedulerLocaleChanged', function () {
+          // Simple change object reference so that ngModel triggers formatting & rendering
+          console.log("Schedule changed ___ ", scope.schedule);
+          scope.schedule = angular.copy(scope.schedule);
+        });
+      }
+    };
+  }]);
+angular.module('weeklyScheduler')
   .directive('inject', [function () {
 
     return {
       link: function ($scope, $element, $attrs, controller, $transclude) {
+
+        // TODO : refactor 
+        // Sigle responsability
+        function resize(el){
+          console.log(el[0].children[0])
+          var height = el[0].children[0].offsetHeight;
+          var nbLines = Object.keys($scope.item.schedules).length;
+
+          el[0].children[0].style.height = height * nbLines + 'px';
+          el[0].children[0].style['line-height'] = height * nbLines + 'px';
+        }
+
         if (!$transclude) {
           throw 'Illegal use of ngTransclude directive in the template! No parent directive that requires a transclusion found.';
         }
@@ -315,6 +665,7 @@ angular.module('weeklyScheduler')
         $transclude(innerScope, function (clone) {
           $element.empty();
           $element.append(clone);
+          resize($element)
           $element.on('$destroy', function () {
             innerScope.$destroy();
           });
@@ -344,7 +695,11 @@ angular.module('weeklyScheduler')
       link: function (scope, element, attrs, schedulerCtrl) {
         var conf = schedulerCtrl.config;
 
-        var nbHours = conf.nbDays*4;
+        var scheduleName = attrs.schedulename;
+        scope.schedulesLenght = Object.keys(scope.item.schedules);
+        scope.scheduleName = scheduleName;
+        var scheduleIndex = attrs.index;
+        var nbHours = conf.nbDays * 4;
         // The default scheduler block size when adding a new item
         var defaultNewScheduleSize = Math.floor(1 / conf.nbDays * 1E8) / 1E6 / 4;
 
@@ -353,25 +708,47 @@ angular.module('weeklyScheduler')
         //   return Math.floor(percent * element[0].clientWidth + 0.5);
         // };
 
+        var percentToPixel = function (percent) {
+          return (percent / 100) * element[0].clientWidth;
+        };
+
         var pixelToVal = function (pixel) {
           var percent = pixel / element[0].clientWidth;
           return Math.floor(percent * nbHours);
         };
 
-        var addSlot = function (start, end) {
+        var addSlot = function (start, end, slotMeta) {
           start = start >= 0 ? start : 0;
           end = end <= nbHours ? end : nbHours;
 
-          var startDate = timeService.addHour(conf.minDate, start*6);
-          var endDate = timeService.addHour(conf.minDate, end*6);
+          var indexDay = Math.floor(start / 4);
+          var indexHour = start % 4;
 
-          scope.$apply(function () {
-            var item = scope.item;
-            if (!item.schedules) {
-              item.schedules = [];
-            }
-            item.schedules.push({start: startDate.toDate(), end: endDate.toDate()});
-          });
+          var translate = {
+            0: 8,
+            1: 10,
+            2: 14,
+            3: 16
+          };
+
+          var startingHour = translate[indexHour];
+
+          var startDate = timeService.addDayAndWeekEnd(conf.minDate, indexDay).set('hour', startingHour);
+          var endDate = timeService.addDayAndWeekEnd(conf.minDate, indexDay).set('hour', startingHour + 2);
+
+          
+          var item = scope.item;
+          if (!item.schedules[scheduleName]) {
+            item.schedules[scheduleName] = [];
+          }
+          var schedule = { start: startDate.toDate(), end: endDate.toDate(), meta: slotMeta }
+          item.schedules[scheduleName].push(schedule);
+
+          console.log("THis is the new schedule ", schedule);
+
+          schedulerCtrl.on.change(scheduleIndex, scheduleName, schedule);
+
+          if (!scope.$$phase) scope.$apply();
         };
 
         var hoverElement = angular.element(element.find('div')[0]);
@@ -383,9 +760,13 @@ angular.module('weeklyScheduler')
 
         element.on('mousemove', function (e) {
           var elOffX = element[0].getBoundingClientRect().left;
+          var pixelBarWidth = percentToPixel(hoverElementWidth)
+
+          var left = e.pageX - elOffX - pixelBarWidth / 2
+          var stickyLeft = Math.round(left / pixelBarWidth) * pixelBarWidth
 
           hoverElement.css({
-            left: e.pageX - elOffX - hoverElementWidth / 2 + 'px'
+            left: stickyLeft + 'px'
           });
         });
 
@@ -395,15 +776,15 @@ angular.module('weeklyScheduler')
             var pixelOnClick = event.pageX - elOffX;
             var valOnClick = pixelToVal(pixelOnClick);
 
-            var start = Math.round(valOnClick - defaultNewScheduleSize / 2);
+            // var start = Math.round(valOnClick - defaultNewScheduleSize / 2);
+            var start = valOnClick;
             var end = start + 1;
-            console.log('elOffX', elOffX);
-            console.log('pixelOnClick', pixelOnClick);
-            console.log('valOnClick', valOnClick);
-            console.log('start', start);
-            console.log('end', end);
 
-            addSlot(start, end);
+            conf.onSlotAdded(function(slotMeta){
+              console.log("slotMeta", slotMeta)
+
+              addSlot(start, end, slotMeta);
+            });
           }
         });
       }
@@ -425,14 +806,14 @@ angular.module('weeklyScheduler')
      * @param options
      * @returns {{minDate: *, maxDate: *, nbWeeks: *}}
      */
-    function config(schedules, options) {
+    function config(schedules, options, getSlotText, onSlotAdded, shouldMergeTwoSlots) {
       var now = moment();
 
       // Calculate min date of all scheduled events
-      var minDate = moment().add(- 1, 'month').startOf('week');
+      var minDate = moment().add(- 1, 'month').startOf('week').add(1, 'day');
 
       // Calculate max date of all scheduled events
-      var maxDate = moment().add(1, 'month').endOf('week');
+      var maxDate = moment().add(1, 'month').endOf('week').subtract(1, 'day');
 
       // Calculate nb of weeks covered by minDate => maxDate
       var nbWeeks = timeService.weekDiff(minDate, maxDate);
@@ -440,7 +821,15 @@ angular.module('weeklyScheduler')
       // Calculate nb of days covered by minDate => maxDate
       var nbDays = timeService.dayDiff(minDate, maxDate);
 
-      var result = angular.extend(options, { minDate: minDate, maxDate: maxDate, nbWeeks: nbWeeks, nbDays: nbDays });
+      var result = angular.extend(options, { 
+        minDate: minDate,
+        maxDate: maxDate,
+        nbWeeks: nbWeeks,
+        nbDays: nbDays,
+        getSlotText: getSlotText,
+        onSlotAdded: onSlotAdded,
+        shouldMergeTwoSlots: shouldMergeTwoSlots 
+      });
       // Log configuration
       $log.debug('Weekly Scheduler configuration:', result);
 
@@ -471,6 +860,10 @@ angular.module('weeklyScheduler')
         var optionsFn = $parse(attrs.options),
           options = angular.extend(defaultOptions, optionsFn(scope) || {});
 
+        var getSlotText = $parse(attrs.getSlotText)(scope);
+        var onSlotAdded = $parse(attrs.onSlotAdded)(scope);
+        var shouldMergeTwoSlots = $parse(attrs.shouldMergeTwoSlots)(scope);
+
         // Get the schedule container element
         var el = element[0].querySelector(defaultOptions.selector);
 
@@ -490,13 +883,13 @@ angular.module('weeklyScheduler')
             schedulerCtrl.config = config(items.reduce(function (result, item) {
               var schedules = item.schedules;
 
-              return result.concat(schedules && schedules.length ?
+              return result.concat(schedules && Object.keys(schedules).length ?
                 // If in multiSlider mode, ensure a schedule array is present on each item
                 // Else only use first element of schedule array
                 (options.monoSchedule ? item.schedules = [schedules[0]] : schedules) :
                 item.schedules = []
               );
-            }, []), options);
+            }, []), options, getSlotText, onSlotAdded, shouldMergeTwoSlots);
 
             // Finally, run the sub directives listeners
             schedulerCtrl.$modelChangeListeners.forEach(function (listener) {
@@ -556,35 +949,111 @@ angular.module('weeklyScheduler')
         var index = scope.$parent.$index;
         var containerEl = element.parent();
         var resizeDirectionIsStart = true;
-        var valuesOnDragStart = {start: scope.schedule.start, end: scope.schedule.end};
+        var valuesOnDragStart = { start: scope.schedule.start, end: scope.schedule.end };
+        var nbHours = conf.nbDays * 4;
+        var multiSliderName = scope.$parent.scheduleName;
+
+        // console.log("scope", scope.schedule)
+        scope.slotText = conf.getSlotText && conf.getSlotText(scope.schedule) || scope.schedule.start + ' - ' + scope.schedule.end;
 
         var pixelToVal = function (pixel) {
-          var percent = pixel / containerEl[0].clientWidth;
-          return Math.floor(percent * conf.nbWeeks + 0.5);
+          var percent = pixel / element[0].parentElement.clientWidth;
+          return Math.floor(percent * nbHours);
         };
 
         var mergeOverlaps = function () {
           var schedule = scope.schedule;
-          var schedules = scope.item.schedules;
+          var schedules = scope.item.schedules[multiSliderName];
+
+          // two edge cases : 
+          //  - 1) other is the last slot of the previous day and current is the first of this day
+          //  - 2) other is the second of the day and current is the third
+          var isTheOtherSlotEndInsideCurrentModel = function(other, current){
+            var otherEnd = moment(other.end);
+            var currentStart = moment(current.start);
+
+            var dayDiff = 
+              moment(current.start).startOf('day')
+               .diff(moment(other.end).startOf('day'), 'day');
+
+            var othersEndHour = otherEnd.get('hour');
+            var currentsStartHour = currentStart.get('hour');
+
+            // basic case
+            if(other.end >= current.start){
+              return true;
+            }
+
+            // edge case 2)
+            if(dayDiff == 0 && othersEndHour == 12 && currentsStartHour == 14){
+              return true;
+            }
+
+
+            // edge case 1)
+            if(dayDiff == 1 && othersEndHour == 18 && currentsStartHour == 8){
+              return true;
+            }
+            return false;
+          }
+
+          // two edge cases : 
+          //  - 1) other is the first slot of the next day and current is the last of this day
+          //  - 2) other is the second of the day and current is the third
+          var isTheOtherSlotStartInsideCurrentModel = function(other, current){
+            var otherStart = moment(other.start);
+            var currentEnd = moment(current.end);
+
+            var dayDiff = 
+              moment(other.start).startOf('day')
+               .diff(moment(current.end).startOf('day'), 'day');
+
+            var othersStartHour = otherStart.get('hour');
+            var currentsEndHour = currentEnd.get('hour');
+
+            // basic case
+            if(other.start <= current.end){
+              return true;
+            }
+
+            // edge case 2)
+            if(dayDiff == 0 && othersStartHour == 14 && currentsEndHour == 12){
+              return true;
+            }
+
+            console.log("dayDiff", dayDiff);
+            // edge case 1)
+            return dayDiff == 1 && othersStartHour == 8 && currentsEndHour == 18;
+          };
+
           schedules.forEach(function (el) {
             if (el !== schedule) {
+
+              if (! conf.shouldMergeTwoSlots(el, schedule)){
+                return;
+              }
+
               // model is inside another slot
               if (el.end >= schedule.end && el.start <= schedule.start) {
+                console.log("model is inside another slot, merging...")
                 schedules.splice(schedules.indexOf(el), 1);
                 schedule.end = el.end;
                 schedule.start = el.start;
               }
               // model completely covers another slot
               else if (schedule.end >= el.end && schedule.start <= el.start) {
+                console.log("model completely covers another slot, merging...")
                 schedules.splice(schedules.indexOf(el), 1);
               }
               // another slot's end is inside current model
-              else if (el.end >= schedule.start && el.end <= schedule.end) {
+              else if (isTheOtherSlotEndInsideCurrentModel(el, schedule) && el.end <= schedule.end) {
+                console.log("another slot's end is inside current model, merging...")
                 schedules.splice(schedules.indexOf(el), 1);
                 schedule.start = el.start;
               }
               // another slot's start is inside current model
-              else if (el.start >= schedule.start && el.start <= schedule.end) {
+              else if (el.start >= schedule.start && isTheOtherSlotStartInsideCurrentModel(el, schedule)) {
+                console.log("another slot's start is inside current model, merging...")
                 schedules.splice(schedules.indexOf(el), 1);
                 schedule.end = el.end;
               }
@@ -598,7 +1067,8 @@ angular.module('weeklyScheduler')
         var deleteSelf = function () {
           containerEl.removeClass('dragging');
           containerEl.removeClass('slot-hover');
-          scope.item.schedules.splice(scope.item.schedules.indexOf(scope.schedule), 1);
+          
+          scope.item.schedules[multiSliderName].splice(scope.item.schedules[multiSliderName].indexOf(scope.schedule), 1);
           containerEl.find('weekly-slot').remove();
           scope.$apply();
         };
@@ -657,9 +1127,9 @@ angular.module('weeklyScheduler')
             var delta = pixelToVal(d);
 
             if (resizeDirectionIsStart) {
-              var newStart = Math.round(valuesOnDragStart.start + delta);
+              var newStart = valuesOnDragStart.start + (delta / 4);
 
-              if (ui.start !== newStart && newStart <= ui.end - 1 && newStart >= 0) {
+              if (ui.start !== newStart && newStart <= ui.end - (1/4) && newStart >= 0) {
                 ngModelCtrl.$setViewValue({
                   start: newStart,
                   end: ui.end
@@ -667,9 +1137,9 @@ angular.module('weeklyScheduler')
                 ngModelCtrl.$render();
               }
             } else {
-              var newEnd = Math.round(valuesOnDragStart.end + delta);
+              var newEnd = valuesOnDragStart.end + ((delta + 1) / 4);
 
-              if (ui.end !== newEnd && newEnd >= ui.start + 1 && newEnd <= conf.nbWeeks) {
+              if (ui.end !== newEnd && newEnd >= ui.start + (1/4) && newEnd <= nbHours) {
                 ngModelCtrl.$setViewValue({
                   start: ui.start,
                   end: newEnd
@@ -684,10 +1154,10 @@ angular.module('weeklyScheduler')
             var delta = pixelToVal(d);
             var duration = valuesOnDragStart.end - valuesOnDragStart.start;
 
-            var newStart = Math.round(valuesOnDragStart.start + delta);
-            var newEnd = Math.round(newStart + duration);
+            var newStart = valuesOnDragStart.start + (delta / 4);
+            var newEnd = newStart + duration;
 
-            if (ui.start !== newStart && newStart >= 0 && newEnd <= conf.nbWeeks) {
+            if (ui.start !== newStart && newStart >= 0 && newEnd <= nbHours) {
               ngModelCtrl.$setViewValue({
                 start: newStart,
                 end: newEnd
@@ -702,8 +1172,36 @@ angular.module('weeklyScheduler')
 
         //// UI -> model ////////////////////////////////////
         ngModelCtrl.$parsers.push(function onUIChange(ui) {
-          ngModelCtrl.$modelValue.start = timeService.addWeek(conf.minDate, ui.start).toDate();
-          ngModelCtrl.$modelValue.end = timeService.addWeek(conf.minDate, ui.end).toDate();
+          var indexStartDay = Math.floor(ui.start);
+          var indexStartHour = ui.start % 1;
+
+          var indexEndDay = Math.floor(ui.end - (1/4));
+          var indexEndHour = (ui.end - (1/4)) % 1;
+
+          var translateStart = {
+            0: 8,
+            1: 10,
+            2: 14,
+            3: 16
+          };
+          var translateEnd = {
+            0: 10,
+            1: 12,
+            2: 16,
+            3: 18
+          };
+
+          var startingHour = translateStart[indexStartHour * 4];
+          var endingHour = translateEnd[indexEndHour * 4];
+
+          console.log("ui.end",ui.end)
+          console.log("indexStartDay", indexStartDay, "indexStartHour", indexStartHour, indexStartHour * 4, "startingHour", startingHour)
+          console.log("indexEndDay", indexEndDay, "indexEndHour", indexEndHour, indexEndHour * 4, "endingHour", endingHour)
+
+
+          ngModelCtrl.$modelValue.start = timeService.addDayAndWeekEnd(conf.minDate, indexStartDay).set('hour', startingHour).toDate();
+          ngModelCtrl.$modelValue.end = timeService.addDayAndWeekEnd(conf.minDate, indexEndDay).set('hour', endingHour).toDate();
+
           //$log.debug('PARSER :', ngModelCtrl.$modelValue.$$hashKey, index, scope.$index, ngModelCtrl.$modelValue);
           schedulerCtrl.on.change(index, scope.$index, ngModelCtrl.$modelValue);
           return ngModelCtrl.$modelValue;
@@ -711,19 +1209,50 @@ angular.module('weeklyScheduler')
 
         //// model -> UI ////////////////////////////////////
         ngModelCtrl.$formatters.push(function onModelChange(model) {
-          var ui = {
-            start: timeService.weekPreciseDiff(conf.minDate, moment(model.start), true),
-            end: timeService.weekPreciseDiff(conf.minDate, moment(model.end), true)
+
+          var translate = {
+            8: 0,
+            10: 6,
+            12: 12,
+            14: 12,
+            16: 18,
+            18: 24
           };
-          //$log.debug('FORMATTER :', index, scope.$index, ui);
-          return ui;
+
+          // console.log("")
+          // console.log("model -> UI - RAW", moment(model.start).format("LLLL"), moment(model.end).format("LLLL"))
+
+          var startHour = moment(model.start).get('hour');
+          var endHour = moment(model.end).get('hour');
+
+          // console.log(startHour, endHour)
+
+          var startHourTranslateTo = translate[startHour];
+          var endHourTranslateTo = translate[endHour];
+
+          // console.log(startHourTranslateTo, endHourTranslateTo)
+
+          if (startHourTranslateTo !== undefined && endHourTranslateTo !== undefined) {
+            var start = moment(model.start).clone().set('hour', startHourTranslateTo)
+            var end = moment(model.end).clone().set('hour', endHourTranslateTo)
+            console.log("model -> UI", start.format("LLLL"), end.format("LLLL"))
+            var ui = {
+              start: timeService.dayPreciseDiff(conf.minDate, moment(start), true),
+              end: timeService.dayPreciseDiff(conf.minDate, moment(end), true)
+            };
+            // console.log("ui model -> UI", ui)
+            //$log.debug('FORMATTER :', index, scope.$index, ui);
+            return ui;
+          }
+          // console.log("ERROR while converting model to UI - startHour : " + startHour, "endHour : ", endHour)
+          return { start: -100, end: -100 };
         });
 
         ngModelCtrl.$render = function () {
           var ui = ngModelCtrl.$viewValue;
           var css = {
-            left: ui.start / conf.nbWeeks * 100 + '%',
-            width: (ui.end - ui.start) / conf.nbWeeks * 100 + '%'
+            left: ui.start / conf.nbDays * 100 + '%',
+            width: (ui.end - ui.start) / conf.nbDays * 100 + '%'
           };
 
           //$log.debug('RENDER :', index, scope.$index, css);
@@ -849,11 +1378,17 @@ angular.module('weeklyScheduler')
       weekPreciseDiff: function (start, end) {
         return end.clone().diff(start.clone(), WEEK, true);
       },
+      dayPreciseDiff: function (start, end) {
+        return end.clone().diff(start.clone(), DAY, true);
+      },
+      dayPreciseDiffWithoutWeekend: function (start, end) {
+        var nbDayWeekEnd = this.nbWeedEndDays(start, end);
+        return end.clone().diff(start.clone(), DAY, true) - nbDayWeekEnd;
+      },
       isWeekEnd: function (date) {
         return date.isoWeekday() === 6 || date.isoWeekday() === 7;
       },
       dayDiff: function (start, end) {
-        console.log('dayDiff', start.format('LLLL'), end.format('LLLL'));
         var date = start.clone().startOf(DAY);
         var nbDay = 0;
         while (end.clone().endOf(DAY) > date) {
@@ -863,6 +1398,20 @@ angular.module('weeklyScheduler')
           date = date.add(1, DAY);
         }
         return nbDay;
+      },
+      nbWeedEndDays: function(from, to){
+        var startWeek = from.clone().startOf(WEEK);
+        var nbDayStartWeek =
+          to.clone().startOf(DAY)
+            .diff(startWeek.clone().startOf(DAY), DAY);
+
+        // 5 day in a working week + 2 days in the we
+        return Math.floor(Math.abs(nbDayStartWeek) / 5) * 2;
+      },
+      addDayAndWeekEnd: function (moment, nbDay) {
+        var dateInit = moment.clone().add(nbDay, DAY);
+        var nbDayWeekEnd = this.nbWeedEndDays(moment, dateInit)
+        return dateInit.clone().add(nbDayWeekEnd, DAY)
       },
       weekDiff: function (start, end) {
         return end.clone().endOf(WEEK).diff(start.clone().startOf(WEEK), WEEK) + 1;
@@ -945,34 +1494,60 @@ angular.module('weeklyScheduler')
         var startDate = minDate.clone();
         var endDate = maxDate.clone();
         var dayDiff = this.dayDiff(startDate, endDate);
-        var monthDiff = this.monthDiff(startDate, endDate);
+        var currentDay = startDate.add(8, HOUR).startOf(HOUR);
+        var translate = {
+          0: {
+            0.25: 8,
+            0.75: 18
+          },
+          0.25: {
+            0.50: 10,
+            0: 10
+          },
+          0.50: {
+            0.75: 14,
+            0.25: 12
+          },
+          0.75: {
+            0: 16,
+            0.50: 16
+          }
+        };
 
-        for (i = 0; i < (dayDiff*4); i++) {
-
-          var startOfHour = i === 0 ? startDate : startDate.add(1, MONTH).startOf(MONTH);
-          var endOfHour = i === monthDiff - 1 ? endDate : startDate.clone().endOf(MONTH);
+        for (i = 0; i < (dayDiff * 4); i++) {
           var width = Math.floor(1 / dayDiff * 1E8) / 1E6 / 4;
+          var rangeStart = (i / 4) - Math.floor(i / 4);
+          var rangeEnd = ((i + 1) / 4) - Math.floor((i + 1) / 4);
+          var startOfHour = currentDay = currentDay.clone().set({hours: parseInt(translate[rangeStart][rangeEnd], 10)}).startOf(HOUR);
+          var endOfHour = currentDay = currentDay.clone().set({hours: parseInt(translate[rangeEnd][rangeStart], 10)}).startOf(HOUR);
+          var addDays = (i !== 0 && (i+1) % 20 === 0) ? 3 : (rangeStart === 0.75)? 1 : 0; //Go to the next day or next monday's week
 
           result.push({start: startOfHour.clone(), end: endOfHour.clone(), width: width});
+          currentDay = (addDays !== 0) ? currentDay.add(addDays, DAY).startOf(DAY).add(8, HOUR).startOf(HOUR) : currentDay;
         }
         return result;
       }
     };
   }]);
-angular.module('ngWeeklySchedulerTemplates', ['ng-weekly-scheduler/views/multi-slider.html', 'ng-weekly-scheduler/views/weekly-scheduler.html', 'ng-weekly-scheduler/views/weekly-slot.html']);
+angular.module('ngWeeklySchedulerTemplates', ['ng-weekly-scheduler/views/hourly-slot.html', 'ng-weekly-scheduler/views/multi-slider.html', 'ng-weekly-scheduler/views/weekly-scheduler.html', 'ng-weekly-scheduler/views/weekly-slot.html']);
+
+angular.module('ng-weekly-scheduler/views/hourly-slot.html', []).run(['$templateCache', function ($templateCache) {
+  $templateCache.put('ng-weekly-scheduler/views/hourly-slot.html',
+    '<div title="{{schedule.start | date}} - {{schedule.end | date}}"><div class="handle left" ondrag=resize ondragstart=startResizeStart ondragstop=endDrag handle></div><div class=slot-text ondrag=drag ondragstart=startDrag ondragstop=endDrag handle>{{slotText}}</div><div class="handle right" ondrag=resize ondragstart=startResizeEnd ondragstop=endDrag handle></div><div class=remove><span class="glyphicon glyphicon-remove"></span></div></div>');
+}]);
 
 angular.module('ng-weekly-scheduler/views/multi-slider.html', []).run(['$templateCache', function ($templateCache) {
   $templateCache.put('ng-weekly-scheduler/views/multi-slider.html',
-    '<div class="slot ghost" ng-show="item.editable !== false && (!schedulerCtrl.config.monoSchedule || !item.schedules.length)">{{schedulerCtrl.config.labels.addNew || \'Add New\'}}</div><weekly-slot class=slot ng-class="{disable: item.editable === false}" ng-repeat="schedule in item.schedules" ng-model=schedule ng-model-options="{ updateOn: \'default blur\', debounce: { \'default\': 500, \'blur\': 0 } }"></weekly-slot>');
+    '<div class="slot ghost" ng-show="item.editable !== false && (!schedulerCtrl.config.monoSchedule || !schedulesLenght)">{{schedulerCtrl.config.labels.addNew || \'Add New\'}}</div><hourly-slot class=slot ng-class="{disable: item.editable === false}" ng-repeat="schedule in item.schedules[scheduleName] track by $index" ng-model=schedule ng-model-options="{ updateOn: \'default blur\', debounce: { \'default\': 500, \'blur\': 0 } }" index=$index></hourly-slot>');
 }]);
 
 angular.module('ng-weekly-scheduler/views/weekly-scheduler.html', []).run(['$templateCache', function ($templateCache) {
   $templateCache.put('ng-weekly-scheduler/views/weekly-scheduler.html',
-    '<div class=labels><div class="srow text-right">{{schedulerCtrl.config.labels.month || \'Month\'}}</div><div class="srow text-right">{{schedulerCtrl.config.labels.weekNb || \'Week number\'}}</div><div class="srow text-right">{{schedulerCtrl.config.labels.dayNb || \'Day\'}}</div><div class="srow text-right">{{schedulerCtrl.config.labels.Hour || \'Hour\'}}</div><div class=schedule-animate ng-repeat="item in schedulerCtrl.items" inject></div></div><div class=schedule-area-container><div class=schedule-area><div class="srow timestamps"><monthly-grid class=grid-container></monthly-grid></div><div class="srow timestamps"><weekly-grid class=grid-container></weekly-grid></div><div class="srow timestamps"><daily-grid class=grid-container></daily-grid></div><div class="srow timestamps"><hour-grid class=grid-container></hour-grid></div><div class="srow schedule-animate" ng-repeat="item in schedulerCtrl.items"><hour-grid class="grid-container striped" no-text></hour-grid><multi-slider index={{$index}}></multi-slider></div></div></div>');
+    '<div class=labels><div class="srow text-right">{{schedulerCtrl.config.labels.month || \'Month\'}}</div><div class="srow text-right">{{schedulerCtrl.config.labels.weekNb || \'Week number\'}}</div><div class="srow text-right">{{schedulerCtrl.config.labels.dayNb || \'Day\'}}</div><div class="srow text-right">{{schedulerCtrl.config.labels.Hour || \'Hour\'}}</div><div class=schedule-animate ng-repeat="item in schedulerCtrl.items" inject></div></div><div class=schedule-area-container><div class=schedule-area><div class="srow timestamps"><monthly-grid class=grid-container></monthly-grid></div><div class="srow timestamps"><weekly-grid class=grid-container></weekly-grid></div><div class="srow timestamps"><daily-grid class=grid-container></daily-grid></div><div class="srow timestamps"><hour-grid class=grid-container></hour-grid></div><div class=schedule-animate ng-repeat="item in schedulerCtrl.items"><div class=srow ng-repeat="(scheduleName, schedule) in item.schedules track by $index"><hour-grid class="grid-container striped" no-text></hour-grid><multi-slider index={{$index}} schedulename={{scheduleName}}></multi-slider></div></div></div></div>');
 }]);
 
 angular.module('ng-weekly-scheduler/views/weekly-slot.html', []).run(['$templateCache', function ($templateCache) {
   $templateCache.put('ng-weekly-scheduler/views/weekly-slot.html',
-    '<div title="{{schedule.start | date}} - {{schedule.end | date}}"><div class="handle left" ondrag=resize ondragstart=startResizeStart ondragstop=endDrag handle></div><div ondrag=drag ondragstart=startDrag ondragstop=endDrag handle>{{schedule.start | date}} - {{schedule.end | date}}</div><div class="handle right" ondrag=resize ondragstart=startResizeEnd ondragstop=endDrag handle></div><div class=remove><span class="glyphicon glyphicon-remove"></span></div></div>');
+    '<div title="{{schedule.start | date}} - {{schedule.end | date}}"><div class="handle left" ondrag=resize ondragstart=startResizeStart ondragstop=endDrag handle></div><div class=slot-text ondrag=drag ondragstart=startDrag ondragstop=endDrag handle>{{slotText}}</div><div class="handle right" ondrag=resize ondragstart=startResizeEnd ondragstop=endDrag handle></div><div class=remove><span class="glyphicon glyphicon-remove"></span></div></div>');
 }]);
 }( window ));
