@@ -59,7 +59,7 @@ angular.module('weeklyScheduler')
           var startingHour = translate[indexHour];
 
           var startDate = timeService.addDayAndWeekEnd(conf.minDate, indexDay).set('hour', startingHour);
-          var endDate = timeService.addDayAndWeekEnd(conf.minDate, indexDay).set('hour', startingHour + 2);
+          var endDate = startDate.clone().set('hour', startingHour + 2);
 
           
           var item = scope.item;
@@ -68,8 +68,6 @@ angular.module('weeklyScheduler')
           }
           var schedule = { start: startDate.toDate(), end: endDate.toDate(), meta: slotMeta }
           item.schedules[scheduleName].push(schedule);
-
-          console.log("THis is the new schedule ", schedule);
 
           schedulerCtrl.on.change(scheduleIndex, scheduleName, schedule);
 
@@ -85,10 +83,10 @@ angular.module('weeklyScheduler')
 
         element.on('mousemove', function (e) {
           var elOffX = element[0].getBoundingClientRect().left;
-          var pixelBarWidth = percentToPixel(hoverElementWidth)
+          var pixelBarWidth = percentToPixel(hoverElementWidth);
 
-          var left = e.pageX - elOffX - pixelBarWidth / 2
-          var stickyLeft = Math.round(left / pixelBarWidth) * pixelBarWidth
+          var left = e.pageX - elOffX - pixelBarWidth / 2;
+          var stickyLeft = Math.round(left / pixelBarWidth) * pixelBarWidth;
 
           hoverElement.css({
             left: stickyLeft + 'px'
@@ -106,7 +104,7 @@ angular.module('weeklyScheduler')
             var end = start + 1;
 
             conf.onSlotAdded(function(slotMeta){
-              console.log("slotMeta", slotMeta)
+              //console.log("slotMeta", slotMeta, start, end)
 
               addSlot(start, end, slotMeta);
             });

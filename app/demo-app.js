@@ -25,18 +25,22 @@ angular.module('demoApp', ['ngAnimate', 'weeklyScheduler', 'weeklySchedulerI18N'
             "schedules": {
               "predicted": [
                 {
-                  "start": "2017-06-26T12:00:00.000Z",
-                  "end": "2017-06-27T10:00:00.000Z"
-                },
-                {
-                  "start": "2017-06-29T06:00:00.000Z",
-                  "end": "2017-06-30T08:00:00.000Z"
+                  "start": "2017-06-26T06:00:00.000Z",
+                  "end": "2017-06-26T16:00:00.000Z",
+                  "meta": {
+                    "project": "project n°1",
+                    "client": "client n°1"
+                  }
                 }
               ],
               "realised": [
                 {
-                  "start": "2017-06-26T12:00:00.000Z",
-                  "end": "2017-06-28T08:00:00.000Z"
+                  "start": "2017-06-26T06:00:00.000Z",
+                  "end": "2017-06-27T08:00:00.000Z",
+                  "meta": {
+                    "project": "project n°1",
+                    "client": "client n°1"
+                  }
                 }
               ]
             }
@@ -48,13 +52,21 @@ angular.module('demoApp', ['ngAnimate', 'weeklyScheduler', 'weeklySchedulerI18N'
               "predicted": [
                 {
                   "start": "2017-06-26T06:00:00.000Z",
-                  "end": "2017-06-30T16:00:00.000Z"
+                  "end": "2017-06-27T16:00:00.000Z",
+                  "meta": {
+                    "project": "project n°1",
+                    "client": "client n°1"
+                  }
                 }
               ],
               "realised": [
                 {
                   "start": "2017-06-26T06:00:00.000Z",
-                  "end": "2017-07-04T14:00:00.000Z"
+                  "end": "2017-06-26T16:00:00.000Z",
+                  "meta": {
+                    "project": "project n°1",
+                    "client": "client n°1"
+                  }
                 }
               ]
             }
@@ -64,8 +76,8 @@ angular.module('demoApp', ['ngAnimate', 'weeklyScheduler', 'weeklySchedulerI18N'
 
 
       this.getSlotText = function(schedule){
-        console.log("schedule",schedule)
-        return schedule.meta.project + ' (' + schedule.meta.client + ')';
+        // console.log("schedule",schedule)
+        // return schedule.meta.project + ' (' + schedule.meta.client + ')';
       }
 
       this.onSlotAdded = function(cb) {
