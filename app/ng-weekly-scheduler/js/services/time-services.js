@@ -64,7 +64,7 @@ angular.module('weeklyScheduler')
         return nbDay;
       },
       nbWeedEndDays: function(from, to){
-        var startWeek = from.clone().startOf(WEEK);
+        var startWeek = from.clone().startOf(WEEK).add(1, DAY); //Start on monday
         var nbDayStartWeek =
           to.clone().startOf(DAY)
             .diff(startWeek.clone().startOf(DAY), DAY);
