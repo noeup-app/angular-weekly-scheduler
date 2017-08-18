@@ -1503,7 +1503,7 @@ angular.module('ngWeeklySchedulerTemplates', ['ng-weekly-scheduler/views/hourly-
 
 angular.module('ng-weekly-scheduler/views/hourly-slot.html', []).run(['$templateCache', function ($templateCache) {
   $templateCache.put('ng-weekly-scheduler/views/hourly-slot.html',
-    '<div title="{{schedule.start | date}} - {{schedule.end | date}}"><div class="handle left" ondrag=resize ondragstart=startResizeStart ondragstop=endDrag handle></div><div class=slot-text ondrag=drag ondragstart=startDrag ondragstop=endDrag handle>{{slotText}}</div><div class="handle right" ondrag=resize ondragstart=startResizeEnd ondragstop=endDrag handle></div><div class=remove><span class="glyphicon glyphicon-remove"></span></div></div>');
+    '<div ng-style="{\'background-color\': (schedule.meta.color) ? schedule.meta.color:\'#4eb8d5\'}" title="{{schedule.start | date}} - {{schedule.end | date}}"><div class="handle left" ondrag=resize ondragstart=startResizeStart ondragstop=endDrag handle></div><div class=slot-text ondrag=drag ondragstart=startDrag ondragstop=endDrag handle>{{slotText}}</div><div class="handle right" ondrag=resize ondragstart=startResizeEnd ondragstop=endDrag handle></div><div class=remove><span class="glyphicon glyphicon-remove"></span></div></div>');
 }]);
 
 angular.module('ng-weekly-scheduler/views/multi-slider.html', []).run(['$templateCache', function ($templateCache) {
