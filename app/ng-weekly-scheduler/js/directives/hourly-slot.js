@@ -259,7 +259,7 @@ angular.module('weeklyScheduler')
           ngModelCtrl.$modelValue.start = ngModelCtrl.$modelValue.start.toDate(); //Equivalent to moment(ngModelCtrl.$modelValue.start).utc().format();
           ngModelCtrl.$modelValue.end = ngModelCtrl.$modelValue.end.toDate(); // Equivalent to moment(ngModelCtrl.$modelValue.end).utc().format();
 
-          schedulerCtrl.on.change(index, scope.$index, ngModelCtrl.$modelValue);
+          schedulerCtrl.on.change(index, scope.$index, ngModelCtrl.$modelValue, scope.$parent.$parent.$index);
 
           return ngModelCtrl.$modelValue;
         });

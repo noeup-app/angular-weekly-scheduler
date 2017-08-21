@@ -564,7 +564,7 @@ angular.module('weeklyScheduler')
           ngModelCtrl.$modelValue.start = ngModelCtrl.$modelValue.start.toDate(); //Equivalent to moment(ngModelCtrl.$modelValue.start).utc().format();
           ngModelCtrl.$modelValue.end = ngModelCtrl.$modelValue.end.toDate(); // Equivalent to moment(ngModelCtrl.$modelValue.end).utc().format();
 
-          schedulerCtrl.on.change(index, scope.$index, ngModelCtrl.$modelValue);
+          schedulerCtrl.on.change(index, scope.$index, ngModelCtrl.$modelValue, scope.$parent.$parent.$index);
 
           return ngModelCtrl.$modelValue;
         });
@@ -667,6 +667,8 @@ angular.module('weeklyScheduler')
       link: function (scope, element, attrs, schedulerCtrl) {
         var conf = schedulerCtrl.config;
 
+        var rowIndex = attrs.rowIndex;
+
         var scheduleName = attrs.schedulename;
         scope.schedulesLenght = Object.keys(scope.item.schedules);
         scope.scheduleName = scheduleName;
@@ -716,7 +718,7 @@ angular.module('weeklyScheduler')
           var schedule = { start: startDate.toDate(), end: endDate.toDate(), meta: slotMeta }
           item.schedules[scheduleName].push(schedule);
 
-          schedulerCtrl.on.change(scheduleIndex, scheduleName, schedule);
+          schedulerCtrl.on.change(scheduleIndex, scheduleName, schedule, rowIndex);
 
           if (!scope.$$phase) scope.$apply();
         };
@@ -880,10 +882,10 @@ angular.module('weeklyScheduler')
           });
 
           schedulerCtrl.on = {
-            change: function (itemIndex, scheduleIndex, scheduleValue) {
+            change: function (itemIndex, scheduleIndex, scheduleValue, rowIndex) {
               var onChangeFunction = $parse(attrs.onChange)(scope);
               if (angular.isFunction(onChangeFunction)) {
-                return onChangeFunction(itemIndex, scheduleIndex, scheduleValue);
+                return onChangeFunction(itemIndex, scheduleIndex, scheduleValue, rowIndex);
               }
             }
           };
@@ -1513,7 +1515,7 @@ angular.module('ng-weekly-scheduler/views/multi-slider.html', []).run(['$templat
 
 angular.module('ng-weekly-scheduler/views/weekly-scheduler.html', []).run(['$templateCache', function ($templateCache) {
   $templateCache.put('ng-weekly-scheduler/views/weekly-scheduler.html',
-    '<div class=labels><div class="srow text-right">{{schedulerCtrl.config.labels.month || \'Month\'}}</div><div class="srow text-right">{{schedulerCtrl.config.labels.weekNb || \'Week number\'}}</div><div class="srow text-right">{{schedulerCtrl.config.labels.dayNb || \'Day\'}}</div><div class="srow text-right">{{schedulerCtrl.config.labels.Hour || \'Hour\'}}</div><div class=schedule-animate ng-repeat="item in schedulerCtrl.items" inject></div></div><div class=schedule-area-container><div class=schedule-area><div class="srow timestamps"><monthly-grid class=grid-container></monthly-grid></div><div class="srow timestamps"><weekly-grid class=grid-container></weekly-grid></div><div class="srow timestamps"><daily-grid class=grid-container></daily-grid></div><div class="srow timestamps"><hour-grid class=grid-container></hour-grid></div><div class=schedule-animate ng-repeat="item in schedulerCtrl.items"><div class=srow ng-repeat="(scheduleName, schedule) in item.schedules track by $index"><hour-grid class="grid-container striped" no-text></hour-grid><multi-slider index={{$index}} schedulename={{scheduleName}}></multi-slider></div></div></div></div>');
+    '<div class=labels><div class="srow text-right">{{schedulerCtrl.config.labels.month || \'Month\'}}</div><div class="srow text-right">{{schedulerCtrl.config.labels.weekNb || \'Week number\'}}</div><div class="srow text-right">{{schedulerCtrl.config.labels.dayNb || \'Day\'}}</div><div class="srow text-right">{{schedulerCtrl.config.labels.Hour || \'Hour\'}}</div><div class=schedule-animate ng-repeat="item in schedulerCtrl.items" inject></div></div><div class=schedule-area-container><div class=schedule-area><div class="srow timestamps"><monthly-grid class=grid-container></monthly-grid></div><div class="srow timestamps"><weekly-grid class=grid-container></weekly-grid></div><div class="srow timestamps"><daily-grid class=grid-container></daily-grid></div><div class="srow timestamps"><hour-grid class=grid-container></hour-grid></div><div class=schedule-animate ng-repeat="item in schedulerCtrl.items track by $index" ng-init="rowIndex = $index"><div class=srow ng-repeat="(scheduleName, schedule) in item.schedules track by $index" ng-init="firstIndex = scheduleIndex"><hour-grid class="grid-container striped" no-text></hour-grid><multi-slider index={{scheduleIndex}} row-index={{rowIndex}} schedulename={{scheduleName}}></multi-slider></div></div></div></div>');
 }]);
 
 angular.module('ng-weekly-scheduler/views/weekly-slot.html', []).run(['$templateCache', function ($templateCache) {

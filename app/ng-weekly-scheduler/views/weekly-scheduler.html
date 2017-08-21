@@ -25,10 +25,10 @@
       <hour-grid class="grid-container"></hour-grid>
     </div>
 
-    <div class="schedule-animate" ng-repeat="item in schedulerCtrl.items">
-      <div class="srow" ng-repeat="(scheduleName, schedule) in item.schedules track by $index">
+    <div class="schedule-animate" ng-repeat="item in schedulerCtrl.items track by $index" ng-init="rowIndex = $index">
+      <div class="srow" ng-repeat="(scheduleName, schedule) in item.schedules track by $index"  ng-init="firstIndex = scheduleIndex">
         <hour-grid class="grid-container striped" no-text></hour-grid>
-        <multi-slider index="{{$index}}" scheduleName="{{scheduleName}}"></multi-slider>
+        <multi-slider index="{{scheduleIndex}}" row-index="{{rowIndex}}" scheduleName="{{scheduleName}}"></multi-slider>
       </div>
     </div>
   </div>

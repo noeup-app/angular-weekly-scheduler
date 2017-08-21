@@ -20,6 +20,8 @@ angular.module('weeklyScheduler')
       link: function (scope, element, attrs, schedulerCtrl) {
         var conf = schedulerCtrl.config;
 
+        var rowIndex = attrs.rowIndex;
+
         var scheduleName = attrs.schedulename;
         scope.schedulesLenght = Object.keys(scope.item.schedules);
         scope.scheduleName = scheduleName;
@@ -69,7 +71,7 @@ angular.module('weeklyScheduler')
           var schedule = { start: startDate.toDate(), end: endDate.toDate(), meta: slotMeta }
           item.schedules[scheduleName].push(schedule);
 
-          schedulerCtrl.on.change(scheduleIndex, scheduleName, schedule);
+          schedulerCtrl.on.change(scheduleIndex, scheduleName, schedule, rowIndex);
 
           if (!scope.$$phase) scope.$apply();
         };
