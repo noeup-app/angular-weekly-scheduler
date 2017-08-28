@@ -10,7 +10,8 @@ angular.module('weeklyScheduler')
             var hours = timeService.hourDistribution(model.minDate, model.maxDate);
 
             // Deploy the grid system on element
-            hours.forEach(function (hour) {
+          //console.log("%c hours[] : %o" , "background: yellow", hours);
+          hours.forEach(function (hour) {
                 var child = GRID_TEMPLATE.clone().css({width: hour.width + '%'});
                 element.append(child);
             });

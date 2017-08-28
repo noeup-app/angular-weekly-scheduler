@@ -154,34 +154,55 @@ angular.module('weeklyScheduler')
         return result;
       },
       hourDistribution: function(minDate, maxDate) {
+        console.log("Calculate hourDistribution");
         var i, result = [];
         var startDate = minDate.clone();
         var endDate = maxDate.clone();
         var dayDiff = this.dayDiff(startDate, endDate);
         var currentDay = startDate.add(8, HOUR).startOf(HOUR);
         var translate = {
-          0: {
-            0.25: 8,
-            0.75: 18
-          },
-          0.25: {
-            0.50: 10,
-            0: 10
-          },
-          0.50: {
-            0.75: 14,
-            0.25: 12
-          },
-          0.75: {
-            0: 16,
-            0.50: 16
-          }
+        0: {0.96875: 18,0.03125: 8},
+        0.03125: {0: 8.25,0.0625: 8.25},
+        0.0625: {0.03125: 8.5,0.09375: 8.5},
+        0.09375: {0.0625: 8.75,0.125: 8.75},
+        0.125: {0.09375: 9,0.15625: 9},
+        0.15625: {0.125: 9.25,0.1875: 9.25},
+        0.1875: {0.15625: 9.5,0.21875: 9.5},
+        0.21875: {0.1875: 9.75,0.25: 9.75},
+        0.25: {0.21875: 10,0.28125: 10},
+        0.28125: {0.25: 10.25,0.3125: 10.25},
+        0.3125: {0.28125: 10.5,0.34375: 10.5},
+        0.34375: {0.3125: 10.75,0.375: 10.75},
+        0.375: {0.34375: 11,0.40625: 11},
+        0.40625: {0.375: 11.25,0.4375: 11.25},
+        0.4375: {0.40625: 11.5,0.46875: 11.5},
+        0.46875: {0.4375: 11.75,0.5: 11.75},
+        0.5: {0.46875: 12,0.53125: 14},
+        0.53125: {0.5: 14.25,0.5625: 14.25},
+        0.5625: {0.53125: 14.5,0.59375: 14.5},
+        0.59375: {0.5625: 14.75,0.625: 14.75},
+        0.625: {0.59375: 15,0.65625: 15},
+        0.65625: {0.625: 15.25,0.6875: 15.25},
+        0.6875: {0.65625: 15.5,0.71875: 15.5},
+        0.71875: {0.6875: 15.75,0.75: 15.75},
+        0.75: {0.71875: 16,0.78125: 16},
+        0.78125: {0.75: 16.25,0.8125: 16.25},
+        0.8125: {0.78125: 16.5,0.84375: 16.5},
+        0.84375: {0.8125: 16.75,0.875: 16.75},
+        0.875: {0.84375: 17,0.90625: 17},
+        0.90625: {0.875: 17.25,0.9375: 17.25},
+        0.9375: {0.90625: 17.5,0.96875: 17.5},
+        0.96875: {0.9375: 17.75,0: 17.75}
+
         };
 
-        for (i = 0; i < (dayDiff * 4); i++) {
-          var width = Math.floor(1 / dayDiff * 1E8) / 1E6 / 4;
-          var rangeStart = (i / 4) - Math.floor(i / 4);
-          var rangeEnd = ((i + 1) / 4) - Math.floor((i + 1) / 4);
+        var slots = 32;
+        for (i = 0; i < (dayDiff * slots); i++) {
+          var width = Math.floor(1 / dayDiff * 1E8) / 1E6 / slots;
+          var rangeStart = (i / slots) - Math.floor(i / slots);
+          var rangeEnd = ((i + 1) / slots) - Math.floor((i + 1) / slots);
+          //console.log("rangeStart ", rangeStart)
+          //console.log("rangeEnd", rangeEnd)
           var startOfHour = currentDay = currentDay.clone().set({hours: parseInt(translate[rangeStart][rangeEnd], 10)}).startOf(HOUR);
           var endOfHour = currentDay = currentDay.clone().set({hours: parseInt(translate[rangeEnd][rangeStart], 10)}).startOf(HOUR);
           var addDays = (i !== 0 && (i+1) % 20 === 0) ? 3 : (rangeStart === 0.75)? 1 : 0; //Go to the next day or next monday's week

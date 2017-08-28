@@ -20,15 +20,18 @@ angular.module('weeklyScheduler')
       link: function (scope, element, attrs, schedulerCtrl) {
         var conf = schedulerCtrl.config;
 
+        var slots= 32;
+        var slotSizeInHour = 2;
+
         var rowIndex = attrs.rowIndex;
 
         var scheduleName = attrs.schedulename;
         scope.schedulesLenght = Object.keys(scope.item.schedules);
         scope.scheduleName = scheduleName;
         var scheduleIndex = attrs.index;
-        var nbHours = conf.nbDays * 4;
+        var nbHours = conf.nbDays * slots;
         // The default scheduler block size when adding a new item
-        var defaultNewScheduleSize = Math.floor(1 / conf.nbDays * 1E8) / 1E6 / 4;
+        var defaultNewScheduleSize = Math.floor((slotSizeInHour * slots/8) / conf.nbDays * 1E8) / 1E6 / slots;
 
         // var valToPixel = function (val) {
         //   var percent = val / (conf.nbDays);
@@ -48,19 +51,54 @@ angular.module('weeklyScheduler')
           start = start >= 0 ? start : 0;
           end = end <= nbHours ? end : nbHours;
 
-          var indexDay = Math.floor(start / 4);
-          var indexHour = start % 4;
+          slotMeta.idxStart = start;
+          slotMeta.idxEnd = end;
+
+          var indexDay = Math.floor(start / slots);
+          var indexHour = start % slots;
 
           var translate = {
-            0: 8,
-            1: 10,
-            2: 14,
-            3: 16
+            0: 8,//8,
+            1: 8,//8.25,
+            2: 8,//8.5,
+            3: 8,//8.75,
+            4: 8,//9,
+            5: 8,//9.25,
+            6: 8,//9.5,
+            7: 8,//9.75,
+            8: 10,//10,
+            9: 10,//10.25,
+            10:10,//10.5,
+            11:10,//10.75,
+            12:10,//11,
+            13:10,//11.25,
+            14:10,//11.5,
+            15:10,//11.75,
+            16:10,//12,
+            17:14,//14.25,
+            18:14,//14.5,
+            19:14,//14.75,
+            20:14,//15,
+            21:14,//15.25,
+            22:14,//15.5,
+            23:14,//15.75,
+            24:16,//16,
+            25:16,//16.25,
+            26:16,//16.5,
+            27:16,//16.75,
+            28:16,//17,
+            29:16,//17.25,
+            30:16,//17.5,
+            31:16//17.75
           };
 
           var startingHour = translate[indexHour];
 
+
           var startDate = timeService.addDayAndWeekEnd(conf.minDate, indexDay).set('hour', startingHour);
+          console.log('startingHour', startingHour, timeService.addDayAndWeekEnd(conf.minDate, indexDay), indexDay)
+          console.log('startDate', startDate)
+
           var endDate = startDate.clone().set('hour', startingHour + 2);
 
           
@@ -103,7 +141,9 @@ angular.module('weeklyScheduler')
 
             // var start = Math.round(valOnClick - defaultNewScheduleSize / 2);
             var start = valOnClick;
-            var end = start + 1;
+            var end = start + (slots/8) * slotSizeInHour;
+
+            //console.log("ici, ", start, end )
 
             conf.onSlotAdded(function(slotMeta){
               //console.log("slotMeta", slotMeta, start, end)
