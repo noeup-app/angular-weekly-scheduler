@@ -31,7 +31,8 @@ angular.module('weeklyScheduler')
         child.addClass('day');
         if (angular.isUndefined(attrs.noText)) {
           //console.log("timeService",timeService, day.start, day.start.toDate())
-          child.text(timeService.dF(day.start.toDate(), 'EEEE dd'));
+
+          child.text(timeService.dF(day.start.toDate().toLocaleDateString("fr"), 'LLL EEEE dd'));
           handleClickEvent(child, days.length, idx, scope);
         }
         element.append(child);
