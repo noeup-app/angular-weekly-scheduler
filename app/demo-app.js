@@ -19,58 +19,65 @@ angular.module('demoApp', ['ngAnimate', 'weeklyScheduler', 'weeklySchedulerI18N'
         "locale": localeService.$locale.id,
         "options": {},
         "items": [
-          {
-            "label": "Item 1",
-            "editable": true,
-            "schedules": {
-              "predicted": [
-                {
-                  "start": "2017-06-26T06:00:00.000Z",
-                  "end": "2017-06-26T16:00:00.000Z",
-                  "meta": {
-                    "project": "project n°1",
-                    "client": "client n°1"
-                  }
-                }
-              ],
-              "realised": [
-                {
-                  "start": "2017-06-26T06:00:00.000Z",
-                  "end": "2017-06-27T08:00:00.000Z",
-                  "meta": {
-                    "project": "project n°1",
-                    "client": "client n°1"
-                  }
-                }
-              ]
-            }
-          },
-          {
-            "label": "Item 2",
-            "editable": true,
-            "schedules": {
-              "predicted": [
-                {
-                  "start": "2017-06-26T06:00:00.000Z",
-                  "end": "2017-06-27T16:00:00.000Z",
-                  "meta": {
-                    "project": "project n°1",
-                    "client": "client n°1"
-                  }
-                }
-              ],
-              "realised": [
-                {
-                  "start": "2017-06-26T06:00:00.000Z",
-                  "end": "2017-06-26T16:00:00.000Z",
-                  "meta": {
-                    "project": "project n°1",
-                    "client": "client n°1"
-                  }
-                }
-              ]
-            }
+          {   "label": "Item 1",
+              "editable": true,
+              "schedules": {
+                "predicted": [],
+                "realised": []
+              }
           }
+          //{
+          //  "label": "Item 1",
+          //  "editable": true,
+          //  "schedules": {
+          //    "predicted": [
+          //      {
+          //        "start": "2017-06-26T06:00:00.000Z",
+          //        "end": "2017-06-26T16:00:00.000Z",
+          //        "meta": {
+          //          "project": "project n°1",
+          //          "client": "client n°1"
+          //        }
+          //      }
+          //    ],
+          //    "realised": [
+          //      {
+          //        "start": "2017-06-26T06:00:00.000Z",
+          //        "end": "2017-06-27T08:00:00.000Z",
+          //        "meta": {
+          //          "project": "project n°1",
+          //          "client": "client n°1"
+          //        }
+          //      }
+          //    ]
+          //  }
+          //},
+          //{
+          //  "label": "Item 2",
+          //  "editable": true,
+          //  "schedules": {
+          //    "predicted": [
+          //      {
+          //        "start": "2017-06-26T06:00:00.000Z",
+          //        "end": "2017-06-27T16:00:00.000Z",
+          //        "meta": {
+          //          "project": "project n°1",
+          //          "client": "client n°1"
+          //        }
+          //      }
+          //    ],
+          //    "realised": [
+          //      {
+          //        "start": "2017-06-26T06:00:00.000Z",
+          //        "end": "2017-06-26T16:00:00.000Z",
+          //        "meta": {
+          //          "project": "project n°1",
+          //          "client": "client n°1"
+          //        }
+          //      }
+          //    ]
+          //  }
+          //}
         ]
       };
 
