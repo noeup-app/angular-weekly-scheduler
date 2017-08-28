@@ -293,3 +293,46 @@ multi-slider hourly-slot.active {
   display: none;
   opacity: 1;
 }
+
+.timestamps > hour-grid .grid-item::before {
+  /*content: '';*/
+  position:relative;
+  font-size:10px;
+  /*background-color:aliceblue;*/
+  float:left;
+  margin-left:2px;
+}
+.timestamps > hour-grid .grid-item:nth-child(32n+1)::before {
+  content: '8';
+}
+.timestamps > hour-grid .grid-item:nth-child(32n+9)::before {
+  content: '10';
+}
+.timestamps > hour-grid .grid-item:nth-child(32n+17)::before {
+  content: '14';
+}
+.timestamps > hour-grid .grid-item:nth-child(32n+25)::before {
+  content: '16';
+}
+
+hour-grid .grid-item:nth-child(8n+5) {
+  border-left:1px solid #8c8c8c;
+  background-color:white
+}
+hour-grid .grid-item:nth-child(8n+1) {
+  border-left:1px solid black;
+  background-color:white
+}
+weekly-grid .grid-item:nth-child(2n) {
+  /*border-left:1px solid black;*/
+  background-color:blue
+}
+monthly-grid .grid-item {
+  /*border-left:2px solid black;*/
+  background-color:white
+}
+daily-grid .grid-item:nth-child(2n) {
+  background-color:green
+}
+
+
