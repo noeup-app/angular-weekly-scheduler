@@ -149,7 +149,7 @@ angular.module('weeklyScheduler')
               //console.log("slotMeta", slotMeta, start, end)
 
               addSlot(start, end, slotMeta);
-            });
+            }, rowIndex);
           }
         });
       }
