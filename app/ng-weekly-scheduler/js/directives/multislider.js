@@ -143,13 +143,11 @@ angular.module('weeklyScheduler')
             var start = valOnClick;
             var end = start + (slots/8) * slotSizeInHour;
 
-            //console.log("ici, ", start, end )
-
             conf.onSlotAdded(function(slotMeta){
               //console.log("slotMeta", slotMeta, start, end)
 
               addSlot(start, end, slotMeta);
-            }, rowIndex);
+            }, rowIndex, scheduleName);
           }
         });
       }
