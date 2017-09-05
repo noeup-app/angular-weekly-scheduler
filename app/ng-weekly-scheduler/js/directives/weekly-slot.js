@@ -178,10 +178,16 @@ angular.module('weeklyScheduler')
          * Delete on right click on slot
          */
         var deleteSelf = function () {
+
+          var rowSchedule = scope.item.schedules[multiSliderName];
+          var indexSlot = rowSchedule.indexOf(scope.schedule);
+
+          conf.onSlotDeleted(rowSchedule[indexSlot]); // Delete event function and send slot info
+
           containerEl.removeClass('dragging');
           containerEl.removeClass('slot-hover');
 
-          scope.item.schedules[multiSliderName].splice(scope.item.schedules[multiSliderName].indexOf(scope.schedule), 1);
+          rowSchedule.splice(indexSlot, 1);
           containerEl.find('weekly-slot').remove();
           scope.$apply();
         };

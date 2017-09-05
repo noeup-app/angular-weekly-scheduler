@@ -508,7 +508,7 @@ angular.module('weeklyScheduler')
      * @param options
      * @returns {{minDate: *, maxDate: *, nbWeeks: *}}
      */
-    function config(schedules, options, getSlotText, onSlotAdded, shouldMergeTwoSlots) {
+    function config(schedules, options, getSlotText, onSlotAdded, shouldMergeTwoSlots, onSlotDeleted) {
       var now = moment();
 
       // Calculate min date of all scheduled events
@@ -530,6 +530,7 @@ angular.module('weeklyScheduler')
         nbDays: nbDays,
         getSlotText: getSlotText,
         onSlotAdded: onSlotAdded,
+        onSlotDeleted: onSlotDeleted,
         shouldMergeTwoSlots: shouldMergeTwoSlots 
       });
       // Log configuration
@@ -564,6 +565,7 @@ angular.module('weeklyScheduler')
 
         var getSlotText = $parse(attrs.getSlotText)(scope);
         var onSlotAdded = $parse(attrs.onSlotAdded)(scope);
+        var onSlotDeleted = $parse(attrs.onSlotDeleted)(scope);
         var shouldMergeTwoSlots = $parse(attrs.shouldMergeTwoSlots)(scope);
 
         // Get the schedule container element
@@ -591,7 +593,7 @@ angular.module('weeklyScheduler')
                 (options.monoSchedule ? item.schedules = [schedules[0]] : schedules) :
                 item.schedules = []
               );
-            }, []), options, getSlotText, onSlotAdded, shouldMergeTwoSlots);
+            }, []), options, getSlotText, onSlotAdded, shouldMergeTwoSlots, onSlotDeleted);
 
             // Finally, run the sub directives listeners
             schedulerCtrl.$modelChangeListeners.forEach(function (listener) {
@@ -818,10 +820,16 @@ angular.module('weeklyScheduler')
          * Delete on right click on slot
          */
         var deleteSelf = function () {
+
+          var rowSchedule = scope.item.schedules[multiSliderName];
+          var indexSlot = rowSchedule.indexOf(scope.schedule);
+
+          conf.onSlotDeleted(rowSchedule[indexSlot]); // Delete event function and send slot info
+
           containerEl.removeClass('dragging');
           containerEl.removeClass('slot-hover');
 
-          scope.item.schedules[multiSliderName].splice(scope.item.schedules[multiSliderName].indexOf(scope.schedule), 1);
+          rowSchedule.splice(indexSlot, 1);
           containerEl.find('weekly-slot').remove();
           scope.$apply();
         };
