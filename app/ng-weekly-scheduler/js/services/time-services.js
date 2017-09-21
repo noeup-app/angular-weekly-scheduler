@@ -227,7 +227,7 @@ angular.module('weeklyScheduler')
           // var startOfHour = currentDay = currentDay.clone().set('hour', 2).set('minute', 15)
           var startOfHour = currentDay = currentDay.clone().set(timeSetter(rangeStart, rangeEnd));
           var endOfHour = currentDay = currentDay.clone().set(timeSetter(rangeEnd, rangeStart));
-          var addDays = (i !== 0 && (i+1) % 20 === 0) ? 3 : (rangeStart === 0.75)? 1 : 0; //Go to the next day or next monday's week
+          var addDays = (i !== 0 && (i+1) % (slots * 5) === 0) ? 3 : (rangeStart === 0.96875)? 1 : 0; //Go to the next day or next monday's week
 
           result.push({start: startOfHour.clone(), end: endOfHour.clone(), width: width});
           currentDay = (addDays !== 0) ? currentDay.add(addDays, DAY).startOf(DAY).add(8, HOUR).startOf(HOUR) : currentDay;
