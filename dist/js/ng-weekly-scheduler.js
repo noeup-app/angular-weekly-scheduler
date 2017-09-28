@@ -314,7 +314,7 @@ angular.module('weeklyScheduler')
         // TODO : refactor 
         // Sigle responsability
         function resize(el){
-          console.log(el[0].children[0])
+          //console.log(el[0].children[0])
           var height = el[0].children[0].offsetHeight;
           var nbLines = Object.keys($scope.item.schedules).length;
 
@@ -390,8 +390,8 @@ angular.module('weeklyScheduler')
           start = start >= 0 ? start : 0;
           end = end <= nbHours ? end : nbHours;
 
-          slotMeta.idxStart = start;
-          slotMeta.idxEnd = end;
+          //slotMeta.idxStart = start;
+          //slotMeta.idxEnd = end;
 
           var indexDay = Math.floor(start / slots);
           var indexHour = start % slots;
@@ -435,12 +435,12 @@ angular.module('weeklyScheduler')
 
 
           var startDate = timeService.addDayAndWeekEnd(conf.minDate, indexDay).set('hour', startingHour);
-          console.log('startingHour', startingHour, timeService.addDayAndWeekEnd(conf.minDate, indexDay), indexDay)
-          console.log('startDate', startDate)
+          //console.log('startingHour', startingHour, timeService.addDayAndWeekEnd(conf.minDate, indexDay), indexDay)
+          //console.log('startDate', startDate)
 
           var endDate = startDate.clone().set('hour', startingHour + 2);
 
-          
+
           var item = scope.item;
           if (!item.schedules[scheduleName]) {
             item.schedules[scheduleName] = [];
@@ -667,43 +667,45 @@ angular.module('weeklyScheduler')
             //0.25: 10
             0: 8,
             0.03125: 8,
-            0.0625:  8,
+            0.0625: 8,
             0.09375: 8,
-            0.125:   8,//9,
+            0.125: 8,//9,
             0.15625: 8,//9.25,
-            0.1875:  8,//9.5,
+            0.1875: 8,//9.5,
             0.21875: 8,//9.75,
-            0.25:    10,//10,
+            0.25: 10,//10,
             0.28125: 10,//10.25,
-            0.3125:  10,//10.5,
+            0.3125: 10,//10.5,
             0.34375: 10,//10.75,
-            0.375:   10,//11,
+            0.375: 10,//11,
             0.40625: 10,//11.25,
-            0.4375:  10,//11.5,
+            0.4375: 10,//11.5,
             0.46875: 10,//11.75,
-            0.5:     14,//14,
+            0.5: 14,//14,
             0.53125: 14,//14.25,
-            0.5625:  14,//14.5,
+            0.5625: 14,//14.5,
             0.59375: 14,//14.75,
-            0.625:   14,//15,
+            0.625: 14,//15,
             0.65625: 14,//15.25,
-            0.6875:  14,//15.5,
+            0.6875: 14,//15.5,
             0.71875: 14,//15.75,
-            0.75:    16,//16,
+            0.75: 16,//16,
             0.78125: 16,//16.25,
-            0.8125:  16,//16.5,
+            0.8125: 16,//16.5,
             0.84375: 16,//16.75,
-            0.875:   16,//17,
+            0.875: 16,//17,
             0.90625: 16,//17.25,
-            0.9375:  16,//17.5,
+            0.9375: 16,//17.5,
             0.96875: 16//17.75
           }
         };
 
-        scope.ngModelCtrl = ngModelCtrl;
-        scope.$watch('ngModelCtrl', function (o, n) {
-          console.log('modelCtrl ------ ', o)
-        })
+        var ghostReference = containerEl.find('ghost');
+
+       //scope.ngModelCtrl = ngModelCtrl;
+       //scope.$watch('ngModelCtrl', function (o, n) {
+       //  console.log('modelCtrl ------ ', o)
+       //})
 
 
         scope.slotText = conf.getSlotText && conf.getSlotText(scope.schedule) || scope.schedule.start + ' - ' + scope.schedule.end;
@@ -773,7 +775,7 @@ angular.module('weeklyScheduler')
               return true;
             }
 
-            console.log("dayDiff:::", dayDiff)
+            //console.log("dayDiff:::", dayDiff)
             // edge case 1)
             if (dayDiff == 1 && othersStartHour == 8 && currentsEndHour == 18) {
               return true;
@@ -824,19 +826,32 @@ angular.module('weeklyScheduler')
           var rowSchedule = scope.item.schedules[multiSliderName];
           var indexSlot = rowSchedule.indexOf(scope.schedule);
 
-          conf.onSlotDeleted(rowSchedule[indexSlot]); // Delete event function and send slot info
+          conf.onSlotDeleted(rowSchedule[indexSlot], scope.$index, ngModelCtrl.$modelValue, scope.$parent.$parent.$index); // Delete event function and send slot info
+
+          //console.log('containerEl', containerEl)
+          //console.log('containerEl slot ', containerEl.find('weekly-slot'))
+          //console.log('element row  ', element, indexSlot)
+          //console.log('Child selected', containerEl.children().eq(scope.$index))
+
 
           containerEl.removeClass('dragging');
           containerEl.removeClass('slot-hover');
-
           rowSchedule.splice(indexSlot, 1);
-          containerEl.find('weekly-slot').remove();
+
+          //containerEl.children().eq().detach();
+          element.detach();
+          //containerEl.find('weekly-slot').detach();
+
+          //containerEl.find('weekly-slot').remove();
+          //element.remove();
           scope.$apply();
+
         };
 
+
         element.find('span').on('click', function (e) {
-          e.preventDefault();
           deleteSelf();
+          e.preventDefault();
         });
 
         element.on('mouseover', function () {
@@ -941,7 +956,6 @@ angular.module('weeklyScheduler')
           console.log("before - ngModelCtrl.$modelValue ", ngModelCtrl.$modelValue)
 
 
-
           var endOfSlot = ((ui.end + 1) % slots) - Math.floor((ui.end + 1) % slots);
           var endToTranslate = translate.end[endOfSlot];
 
@@ -961,7 +975,7 @@ angular.module('weeklyScheduler')
         //// model -> UI ////////////////////////////////////
         ngModelCtrl.$formatters.push(function onModelChange(model) {
 
-          console.log("onModelChange ", model)
+          //console.log("onModelChange ", model)
 
 
           var startHour = moment(model.start).get('hour');
@@ -969,37 +983,37 @@ angular.module('weeklyScheduler')
 
           if (startHour !== undefined && endHour !== undefined) {
 
-            var idxStart = model.meta.idxStart;
-            var idxEnd = model.meta.idxEnd;
+            var idxStart //= model.meta.idxStart;
+            var idxEnd //= model.meta.idxEnd;
 
 
-            console.log('Model value', ngModelCtrl.$modelValue, hours)
+            //console.log('Model value', ngModelCtrl.$modelValue, hours)
 
-            //hours.forEach(function (hour) {
-            //  if (hour.start.format() === moment(ngModelCtrl.$modelValue.start).format())
-            //    idxStart = hours.indexOf(hour);
-            //  if (hour.end.format() === moment(ngModelCtrl.$modelValue.end).format())
-            //    idxEnd = hours.indexOf(hour) + 1;
-            //});
+            hours.forEach(function (hour) {
+              if (hour.start.format() === moment(ngModelCtrl.$modelValue.start).format())
+                idxStart = hours.indexOf(hour);
+              if (hour.end.format() === moment(ngModelCtrl.$modelValue.end).format())
+                idxEnd = hours.indexOf(hour) + 1;
+            });
 
-            console.log('Start', idxStart / slots)
+            //console.log('Start', idxStart / slots)
 
-            console.log('--- Set modelValue ---')
-            console.log('Slots', slots, 'idxStart ', idxStart, 'idxEnd ', idxEnd)
-            console.log('Ui -> start', idxStart / slots)
-            console.log('Ui -> end', idxEnd / slots)
-            console.log('______________________')
+            //console.log('--- Set modelValue ---')
+            //console.log('Slots', slots, 'idxStart ', idxStart, 'idxEnd ', idxEnd)
+            //console.log('Ui -> start', idxStart / slots)
+            //console.log('Ui -> end', idxEnd / slots)
+            //console.log('______________________')
             //console.log('EndOfSlot', endOfSlot)
             //console.log('ui.start', ui.start)
             //console.log('hours[ui.start * slots].start', hours[ui.start * slots].start)
             //console.log('hours[ui.start * slots]', hours[ui.start * slots])
             //console.log('translate.end[ui.start]', translate.end[ui.start])
             //console.log('translate.end[hours[ui.start * slots]]', translate.end[hours[ui.start * slots]])
-            console.log('______________________')
+            //console.log('______________________')
 
 
             return { //Update $modelValue
-             start: idxStart / slots,
+              start: idxStart / slots,
               end: idxEnd / slots
             };
           }
@@ -1011,7 +1025,7 @@ angular.module('weeklyScheduler')
 
           var ui = ngModelCtrl.$viewValue;
 
-          console.log('ui render', ui)
+          //console.log('ui render', ui)
           var css = {
             left: (ui.start / conf.nbDays) * 100 + '%',
             width: (ui.end - ui.start) / conf.nbDays * 100 + '%'
@@ -1252,7 +1266,6 @@ angular.module('weeklyScheduler')
         return result;
       },
       hourDistribution: function(minDate, maxDate) {
-        console.log("Calculate hourDistribution");
         var i, result = [];
         var startDate = minDate.clone();
         var endDate = maxDate.clone();
@@ -1325,7 +1338,7 @@ angular.module('weeklyScheduler')
           // var startOfHour = currentDay = currentDay.clone().set('hour', 2).set('minute', 15)
           var startOfHour = currentDay = currentDay.clone().set(timeSetter(rangeStart, rangeEnd));
           var endOfHour = currentDay = currentDay.clone().set(timeSetter(rangeEnd, rangeStart));
-          var addDays = (i !== 0 && (i+1) % 20 === 0) ? 3 : (rangeStart === 0.75)? 1 : 0; //Go to the next day or next monday's week
+          var addDays = (i !== 0 && (i+1) % (slots * 5) === 0) ? 3 : (rangeStart === 0.96875)? 1 : 0; //Go to the next day or next monday's week
 
           result.push({start: startOfHour.clone(), end: endOfHour.clone(), width: width});
           currentDay = (addDays !== 0) ? currentDay.add(addDays, DAY).startOf(DAY).add(8, HOUR).startOf(HOUR) : currentDay;
