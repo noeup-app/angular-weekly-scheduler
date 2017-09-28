@@ -139,8 +139,10 @@ multi-slider weekly-slot .handle.right {
 
 multi-slider weekly-slot:not(.disable) .remove {
   display: none;
+  position: absolute;
   cursor: pointer;
-  float: right;
+  right: 0;
+  z-index: 1;
   margin-right: -30px;
   width: 25px;
   background: red;
