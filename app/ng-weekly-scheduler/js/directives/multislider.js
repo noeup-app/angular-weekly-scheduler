@@ -51,8 +51,8 @@ angular.module('weeklyScheduler')
           start = start >= 0 ? start : 0;
           end = end <= nbHours ? end : nbHours;
 
-          slotMeta.idxStart = start;
-          slotMeta.idxEnd = end;
+          //slotMeta.idxStart = start;
+          //slotMeta.idxEnd = end;
 
           var indexDay = Math.floor(start / slots);
           var indexHour = start % slots;
@@ -96,12 +96,12 @@ angular.module('weeklyScheduler')
 
 
           var startDate = timeService.addDayAndWeekEnd(conf.minDate, indexDay).set('hour', startingHour);
-          console.log('startingHour', startingHour, timeService.addDayAndWeekEnd(conf.minDate, indexDay), indexDay)
-          console.log('startDate', startDate)
+          //console.log('startingHour', startingHour, timeService.addDayAndWeekEnd(conf.minDate, indexDay), indexDay)
+          //console.log('startDate', startDate)
 
           var endDate = startDate.clone().set('hour', startingHour + 2);
 
-          
+
           var item = scope.item;
           if (!item.schedules[scheduleName]) {
             item.schedules[scheduleName] = [];

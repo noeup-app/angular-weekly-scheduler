@@ -154,7 +154,6 @@ angular.module('weeklyScheduler')
         return result;
       },
       hourDistribution: function(minDate, maxDate) {
-        console.log("Calculate hourDistribution");
         var i, result = [];
         var startDate = minDate.clone();
         var endDate = maxDate.clone();

@@ -7,7 +7,7 @@ angular.module('weeklyScheduler')
         // TODO : refactor 
         // Sigle responsability
         function resize(el){
-          console.log(el[0].children[0])
+          //console.log(el[0].children[0])
           var height = el[0].children[0].offsetHeight;
           var nbLines = Object.keys($scope.item.schedules).length;
 
