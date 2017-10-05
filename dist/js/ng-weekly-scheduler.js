@@ -512,10 +512,10 @@ angular.module('weeklyScheduler')
       var now = moment();
 
       // Calculate min date of all scheduled events
-      var minDate = moment().add(- 1, 'month').startOf('week').add(1, 'day');
+      var minDate = (options.startDate) ? moment(options.startDate).utc() : moment().add(- 1, 'month').startOf('week').add(1, 'day');
 
       // Calculate max date of all scheduled events
-      var maxDate = moment().add(1, 'month').endOf('week').subtract(1, 'day');
+      var maxDate = (options.endDate) ? moment(options.endDate).utc() : moment().add(1, 'month').endOf('week').subtract(1, 'day');
 
       // Calculate nb of weeks covered by minDate => maxDate
       var nbWeeks = timeService.weekDiff(minDate, maxDate);
@@ -523,9 +523,12 @@ angular.module('weeklyScheduler')
       // Calculate nb of days covered by minDate => maxDate
       var nbDays = timeService.dayDiff(minDate, maxDate);
 
+
       var result = angular.extend(options, { 
         minDate: minDate,
         maxDate: maxDate,
+        startDate: options.startDate,
+        endDate: options.endDate,
         nbWeeks: nbWeeks,
         nbDays: nbDays,
         getSlotText: getSlotText,
@@ -560,8 +563,8 @@ angular.module('weeklyScheduler')
       }],
       controllerAs: 'schedulerCtrl',
       link: function (scope, element, attrs, schedulerCtrl) {
-        var optionsFn = $parse(attrs.options),
-          options = angular.extend(defaultOptions, optionsFn(scope) || {});
+        var optionsFn = $parse(attrs.options);
+        var options = angular.extend(defaultOptions, optionsFn(scope) || {});
 
         var getSlotText = $parse(attrs.getSlotText)(scope);
         var onSlotAdded = $parse(attrs.onSlotAdded)(scope);
