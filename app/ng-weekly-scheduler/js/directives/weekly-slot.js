@@ -323,6 +323,8 @@ angular.module('weeklyScheduler')
           ngModelCtrl.$modelValue.start = ngModelCtrl.$modelValue.start.toDate(); //Equivalent to moment(ngModelCtrl.$modelValue.start).utc().format();
           ngModelCtrl.$modelValue.end = ngModelCtrl.$modelValue.end.toDate(); // Equivalent to moment(ngModelCtrl.$modelValue.end).utc().format();
 
+          ngModelCtrl.$modelValue.duration = (ui.end * slots) - (ui.start * slots);
+
           schedulerCtrl.on.change(index, scope.$index, ngModelCtrl.$modelValue, scope.$parent.$parent.$index);
 
           console.log("after - ngModelCtrl.$modelValue ", ngModelCtrl.$modelValue)

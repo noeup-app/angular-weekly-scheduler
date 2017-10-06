@@ -93,20 +93,25 @@ angular.module('weeklyScheduler')
           };
 
           var startingHour = translate[indexHour];
-
+          var endingHour = startingHour + 2;
 
           var startDate = timeService.addDayAndWeekEnd(conf.minDate, indexDay).set('hour', startingHour);
           //console.log('startingHour', startingHour, timeService.addDayAndWeekEnd(conf.minDate, indexDay), indexDay)
           //console.log('startDate', startDate)
 
-          var endDate = startDate.clone().set('hour', startingHour + 2);
+          var endDate = startDate.clone().set('hour', endingHour);
 
 
           var item = scope.item;
           if (!item.schedules[scheduleName]) {
             item.schedules[scheduleName] = [];
           }
-          var schedule = { start: startDate.toDate(), end: endDate.toDate(), meta: slotMeta }
+          var schedule = {
+            start: startDate.toDate(),
+            end: endDate.toDate(),
+            duration: (endingHour - startingHour) * 4, //calculate nb of 15mins
+            meta: slotMeta
+          };
           item.schedules[scheduleName].push(schedule);
 
           schedulerCtrl.on.change(scheduleIndex, scheduleName, schedule, rowIndex);
